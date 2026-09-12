@@ -2,7 +2,6 @@
 	"name": "catania",
 	"compatibility_date": "2025-10-08",
 	"compatibility_flags": ["nodejs_compat"],
-	"main": "./dist/index.html",
 	"assets": {
 		"directory": "./dist",
 		"binding": "ASSETS"
