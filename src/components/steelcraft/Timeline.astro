@@ -1,0 +1,85 @@
+---
+import "../../styles/steelcraft/timeline.css";
+
+interface TimelineItem {
+  subTitle?: string;
+  title?: string;
+  description?: string;
+  heading?: string;
+  subHeading?: string;
+  image?: string;
+  imageALT?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+  order?: string;
+  publish?: string;
+}
+
+interface Props {
+  items: TimelineItem[];
+}
+
+const { items = [] } = Astro.props;
+
+// Order 1 = header row (has heading / subHeading / buttons)
+const sorted = [...items].sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+const headerItem = sorted.find(i => i.heading || i.subHeading || i.button1Text || i.button2Text) || null;
+const events     = sorted.filter(i => i !== headerItem);
+
+const btn1 = headerItem?.button1Text && headerItem?.button1Link ? headerItem : null;
+const btn2 = headerItem?.button2Text && headerItem?.button2Link ? headerItem : null;
+---
+
+<section class="timeline-section">
+  <div class="timeline-container">
+
+    {headerItem && (
+      <div class="timeline-header">
+        {headerItem.title && <span class="timeline-eyebrow">{headerItem.title}</span>}
+        {headerItem.heading && <h2 class="timeline-main-title">{headerItem.heading}</h2>}
+        {headerItem.subHeading && (
+          <p class="timeline-sub-heading">{headerItem.subHeading}</p>
+        )}
+        {(btn1 || btn2) && (
+          <div class="timeline-header-actions">
+            {btn1 && (
+              <a class="timeline-btn primary" href={headerItem!.button1Link}>
+                {headerItem!.button1Text}
+              </a>
+            )}
+            {btn2 && (
+              <a class="timeline-btn secondary" href={headerItem!.button2Link}>
+                {headerItem!.button2Text}
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    )}
+
+    {events.length > 0 && (
+      <div class="timeline-track">
+        {events.map((event, index) => {
+          const dateVal = event.subTitle || (event.description && (event.image || event.imageALT) ? event.description : '');
+          const titleVal = event.title || event.image || '';
+          const descVal = (event.subTitle || event.title) ? event.description : (event.imageALT || event.description || '');
+
+          return (
+            <div class={`timeline-event ${index % 2 === 0 ? 'left' : 'right'}`}>
+              <span class="timeline-dot" aria-hidden="true"></span>
+              <span class="timeline-connector" aria-hidden="true"></span>
+              <div class="timeline-card">
+                {dateVal && <span class="timeline-date">{dateVal}</span>}
+                {titleVal && <h3 class="timeline-event-title">{titleVal}</h3>}
+                {descVal && <p class="timeline-event-desc">{descVal}</p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+  </div>
+</section>

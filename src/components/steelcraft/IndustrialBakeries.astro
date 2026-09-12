@@ -1,0 +1,110 @@
+---
+import '../../styles/steelcraft/industrial-bakery.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  heading?: string;
+  subTitle?: string;
+  description?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+}
+
+const {
+  heading = "Industrial Bakeries",
+  subTitle,
+  description,
+  button1Text,
+  button1Link,
+  button2Text,
+  button2Link,
+  items,
+  folderPath
+} = Astro.props;
+
+const finalButton1Link = button1Text && !button1Link ? '/contactus' : button1Link;
+const finalButton2Link = button2Text && !button2Link ? '/contactus' : button2Link;
+
+// Load industrial bakery items dynamically if not passed via props
+let bakeryItems = items || [];
+if (!bakeryItems || bakeryItems.length === 0) {
+  const bakeryFiles = import.meta.glob('../../content/industries/industrial-bakeries/*.mdx', { eager: true });
+  bakeryItems = Object.values(bakeryFiles)
+    .map(p => (p as any).frontmatter)
+    .filter(p => p && (p.publish === 'Y' || p.publish === 'y' || !p.publish))
+    .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+}
+---
+
+{bakeryItems.length > 0 && (
+  <section class="ind-bakery-section">
+    <div class="ind-bakery-container">
+      {(heading || description) && (
+        <div class="ind-bakery-header">
+          {heading && (
+            <h2 class="ind-bakery-heading">{heading}</h2>
+          )}
+          {description && (
+            <p class="ind-bakery-section-description">{description}</p>
+          )}
+        </div>
+      )}
+
+      <div class="ind-bakery-grid">
+        {bakeryItems.map((item) => {
+          const imageSrc = resolveImage(item.image || item.imageFeatured);
+          const name = item.title || item.name || "Industrial Bakery";
+          const targetFolder = item.folder || folderPath || 'industries/industrial-bakeries';
+          
+          return (
+            <a href={`/${targetFolder}/${item.slug}`} class="ind-bakery-card">
+              {imageSrc && (
+                <div class="ind-bakery-image-wrapper">
+                  <Image 
+                    class="ind-bakery-image" 
+                    src={imageSrc} 
+                    alt={item.imageAltText || item.imageALT || name} 
+                    widths={[300, 600, 900]}
+                    sizes="(max-width: 768px) 400px, 400px"
+                    quality="mid"
+                    format="avif"
+                    fetchpriority="high"
+                    loading="eager" 
+                    decoding="async" 
+                  />
+                </div>
+              )}
+              <h3 class="ind-bakery-title">{name}</h3>
+              {item.shortDescription || item.description ? (
+                <p class="ind-bakery-description">
+                  {item.shortDescription || item.description.substring(0, 150) + "..."}
+                </p>
+              ) : null}
+              <span class="card-link-text">Read More</span>
+            </a>
+          );
+        })}
+      </div>
+
+      {(button1Text && finalButton1Link) || (button2Text && finalButton2Link) ? (
+        <div class="ind-bakery-actions">
+          {button1Text && finalButton1Link && (
+            <a class="ind-bakery-button" href={finalButton1Link}>
+              {button1Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+          {button2Text && finalButton2Link && (
+            <a class="ind-bakery-button secondary" href={finalButton2Link}>
+              {button2Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+  </section>
+)}

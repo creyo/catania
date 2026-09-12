@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Top from '../components/catania/Top.astro';
+import Contact from '../components/catania/Contact.astro';
+import { frontmatter } from '../content/contact-us.mdx';
+
+const topItem = frontmatter.data.find((c) => c.section === 'Top' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+const formItem = frontmatter.data.find((c) => c.section === 'Form' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+
+---
+<Layout
+  title={frontmatter.metaTitle || "Contact Us"}
+  description={frontmatter.metaDescription || "Default description"}
+>
+{topItem && <Top {...topItem} folderPath="contact-us" />}
+{formItem && <Contact {...formItem} folderPath="contact-us" />}
+
+</Layout>

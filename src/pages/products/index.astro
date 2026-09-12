@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Top from '../../components/catania/Top.astro';
+import Products from '../../components/catania/Products.astro';
+import LastBlock from '../../components/catania/LastBlock.astro';
+import { frontmatter } from '../../content/products.mdx';
+
+const topItem = frontmatter.data.find((c) => c.section === 'Top' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+const productsItem = frontmatter.data.find((c) => c.section === 'Products' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+const lastblockItem = frontmatter.data.find((c) => c.section === 'LastBlock' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+
+---
+<Layout
+  title={frontmatter.metaTitle || "Products"}
+  description={frontmatter.metaDescription || "Default description"}
+>
+{topItem && <Top {...topItem} folderPath="products" />}
+{productsItem && <Products {...productsItem} folderPath="products" />}
+{lastblockItem && <LastBlock {...lastblockItem} folderPath="products" />}
+
+</Layout>

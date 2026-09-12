@@ -1,0 +1,173 @@
+---
+import { Image } from 'astro:assets';
+import '../../styles/catania/footer.css';
+import { parseFlatMenu } from '../../utils/menuParser';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  settings?: Record<string, string>;
+}
+
+const { settings } = Astro.props;
+const currentYear = new Date().getFullYear();
+
+const logoAsset = resolveImage(settings?.logo);
+
+const quickLinks = parseFlatMenu(settings?.footerMenu);
+
+const serviceLinks = parseFlatMenu(settings?.serviceMenu || settings?.servicesMenu);
+
+const socialLinks = parseFlatMenu(settings?.socialButton || settings?.socialLinks);
+
+const phoneNumber = '+971 6 535 8448';
+const phoneHref = 'tel:+97165358448';
+const email = 'info@catania.ae';
+const emailHref = 'mailto:info@catania.ae';
+const address = 'Sharjah, United Arab Emirates';
+---
+
+<footer class="site-footer" id="site-footer">
+  <div class="footer-main">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="footer-logo" href="/" aria-label={`${settings?.name || 'Dubai Property Help'} - Go to homepage`}>
+          {logoAsset && (
+            <Image
+              src={logoAsset}
+              alt={`${settings?.name || 'Dubai Property Help'} logo`}
+              width={200}
+              loading="lazy"
+              decoding="async"
+              format="webp"
+              quality={85}
+            />
+          )}
+        </a>
+        <p class="footer-description">
+          Leading provider of innovative solutions, committed to quality and excellence across the UAE and beyond.
+        </p>
+        <div class="footer-social" aria-label="Social media links">
+          {socialLinks.length > 0 ? (
+            socialLinks.map((item) => {
+              const label = item.label.toLowerCase();
+              const href = item.href;
+
+              if (label.includes('facebook') || href.includes('facebook.com')) {
+                return (
+                  <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook" id="social-facebook">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                  </a>
+                );
+              }
+              if (label.includes('linkedin') || href.includes('linkedin.com')) {
+                return (
+                  <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer" aria-label="Connect with us on LinkedIn" id="social-linkedin">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                  </a>
+                );
+              }
+              if (label.includes('instagram') || href.includes('instagram.com')) {
+                return (
+                  <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" id="social-instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                  </a>
+                );
+              }
+              if (label.includes('twitter') || label.includes('x') || href.includes('twitter.com') || href.includes('x.com')) {
+                return (
+                  <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer" aria-label="Follow us on X (Twitter)" id="social-twitter">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                );
+              }
+              if (label.includes('youtube') || href.includes('youtube.com')) {
+                return (
+                  <a class="footer-social-link" href={href} target="_blank" rel="noopener noreferrer" aria-label="Watch us on YouTube" id="social-youtube">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </a>
+                );
+              }
+              return null;
+            })
+          ) : (
+            <>
+              <a class="footer-social-link" href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook" id="social-facebook">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+              <a class="footer-social-link" href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="Connect with us on LinkedIn" id="social-linkedin">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </a>
+              <a class="footer-social-link" href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" id="social-instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </a>
+              <a class="footer-social-link" href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Follow us on X (Twitter)" id="social-twitter">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          {quickLinks.map((link) => (
+            <li>
+              <a class="footer-link" href={link.href} id={`footer-link-${link.label.toLowerCase()}`}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3 class="footer-heading">Services</h3>
+        <ul class="footer-links">
+          {serviceLinks.map((link) => (
+            <li>
+              <a class="footer-link" href={link.href} id={`footer-link-${link.label.toLowerCase()}`}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3 class="footer-heading">Contact</h3>
+        <div class="footer-links">
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <a class="footer-contact-link" href={phoneHref} id="footer-phone">{phoneNumber}</a>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <a class="footer-contact-link" href={emailHref} id="footer-email">{email}</a>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span>{address}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        &copy; {currentYear} Catania. All rights reserved.
+      </p>
+      <div class="footer-bottom-links">
+        <a class="footer-bottom-link" href="/privacy-policy" id="footer-privacy">Privacy Policy</a>
+        <a class="footer-bottom-link" href="/terms" id="footer-terms">Terms of Service</a>
+        <a class="footer-bottom-link" href="/sitemap.xml" id="footer-sitemap">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>

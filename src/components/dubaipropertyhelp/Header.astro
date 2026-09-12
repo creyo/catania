@@ -1,0 +1,228 @@
+---
+import { Image } from 'astro:assets';
+import '../../styles/dubaiPropertyHelp/header.css';
+import { parseMenuString } from '../../utils/menuParser';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  currentPath?: string;
+  settings?: Record<string, string>;
+}
+
+const { currentPath = Astro.url.pathname, settings } = Astro.props;
+
+const logoAsset = resolveImage(settings?.logo);
+
+const navItems = parseMenuString(settings?.topMenu);
+const ctaText = settings?.ctaText || "Free Consultation";
+
+const isActive = (href?: string) => {
+  if (!href) return false;
+  if (href === '/' || href === '#') return currentPath === '/';
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+};
+
+const phoneNumber = '+971 6 535 8448';
+const phoneHref = 'tel:+97165358448';
+---
+
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
+
+<header class="site-header" id="site-header">
+  <div class="header-main">
+    <div class="header-logo">
+      <a href="/" aria-label={`${settings?.name || 'Dubai Property Help'} - Go to homepage`}>
+        {logoAsset && (
+          <Image
+            src={logoAsset}
+            alt={`${settings?.name || 'Dubai Property Help'} logo`}
+            width={260}
+            loading="eager"
+            decoding="async"
+            format="webp"
+            quality={85}
+          />
+        )}
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav" aria-label="Main navigation">
+      <ul class="header-nav-list">
+        {navItems.map((item) => (
+          <li class={`header-nav-item ${item.subItems ? 'has-dropdown' : ''}`}>
+            {item.subItems ? (
+              <>
+                <a
+                  class="header-nav-link header-dropdown-toggle"
+                  href="#"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  {item.label}
+                  <svg class="header-dropdown-chevron" viewBox="0 0 20 20" width="12" height="12" fill="currentColor">
+                    <path d="M5.2 7.6L10 12.4l4.8-4.8 1.2 1.2-6 6-6-6 1.2-1.2z"/>
+                  </svg>
+                </a>
+                <ul class="header-dropdown-menu">
+                  {item.subItems.map((subItem) => (
+                    <li>
+                      <a
+                        class="header-dropdown-link"
+                        href={subItem.href}
+                        aria-current={currentPath === subItem.href ? 'page' : undefined}
+                      >
+                        {subItem.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <a
+                class={`header-nav-link ${isActive(item.href) ? 'is-active' : ''}`}
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                id={`nav-link-${item.label.toLowerCase()}`}
+              >
+                {item.label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <div class="header-mobile-actions">
+        <a class="header-phone" href={phoneHref} aria-label="Call us at +971 6 535 8448" id="mobile-phone-link">
+          <svg class="header-phone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <span>{phoneNumber}</span>
+        </a>
+        <a class="header-cta" href="/contact" id="mobile-cta-btn">
+          {ctaText}
+        </a>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <a class="header-cta" href="/contact" id="desktop-cta-btn">
+        {ctaText}
+      </a>
+    </div>
+
+    <button
+      class="header-menu-toggle"
+      id="header-menu-toggle"
+      aria-expanded="false"
+      aria-controls="header-nav"
+      aria-label="Open navigation menu"
+      type="button"
+    >
+      <span class="hamburger-icon" aria-hidden="true">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </span>
+    </button>
+  </div>
+
+  <div class="header-bottom-bar" aria-hidden="true"></div>
+</header>
+
+<div class="header-mobile-overlay" id="header-mobile-overlay" aria-hidden="true"></div>
+
+<script>
+  function initHeader() {
+    const toggle = document.getElementById('header-menu-toggle');
+    const nav = document.getElementById('header-nav');
+    const overlay = document.getElementById('header-mobile-overlay');
+
+    if (!toggle || !nav || !overlay) return;
+
+    function openMenu() {
+      toggle!.setAttribute('aria-expanded', 'true');
+      toggle!.setAttribute('aria-label', 'Close navigation menu');
+      nav!.classList.add('is-open');
+      overlay!.classList.add('is-visible');
+      overlay!.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      toggle!.setAttribute('aria-expanded', 'false');
+      toggle!.setAttribute('aria-label', 'Open navigation menu');
+      nav!.classList.remove('is-open');
+      overlay!.classList.remove('is-visible');
+      overlay!.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      isOpen ? closeMenu() : openMenu();
+    });
+
+    overlay.addEventListener('click', closeMenu);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        closeMenu();
+        toggle.focus();
+      }
+    });
+
+    const mediaQuery = window.matchMedia('(min-width: 901px)');
+    mediaQuery.addEventListener('change', (e) => {
+      if (e.matches) closeMenu();
+    });
+
+    nav.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const focusable = nav.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])'
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        toggle.focus();
+      }
+    });
+
+    nav.querySelectorAll('.header-dropdown-toggle').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const parent = btn.closest('.header-nav-item.has-dropdown');
+        if (!parent) return;
+        const wasOpen = parent.classList.contains('is-open');
+        nav.querySelectorAll('.header-nav-item.has-dropdown').forEach((item) => {
+          item.classList.remove('is-open');
+        });
+        if (!wasOpen) parent.classList.add('is-open');
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target instanceof Element && !target.closest('.has-dropdown')) {
+        nav.querySelectorAll('.header-nav-item.has-dropdown').forEach((item) => {
+          item.classList.remove('is-open');
+        });
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeader);
+  } else {
+    initHeader();
+  }
+</script>

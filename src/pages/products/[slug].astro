@@ -1,0 +1,22 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DetailComponent from '../../components/catania/ProductDetail.astro';
+
+export async function getStaticPaths() {
+  const files = import.meta.glob('../../content/products/*.mdx', { eager: true });
+  return Object.values(files)
+    .filter((p: any) => (p.frontmatter.publish || 'Y').toUpperCase() === 'Y')
+    .map((p: any) => {
+      return {
+        params: { slug: p.frontmatter.slug },
+        props: { item: p.frontmatter, Content: p.Content }
+      };
+    });
+}
+
+const { item, Content } = Astro.props;
+---
+
+<Layout title={`${item.title || item.name || item.productName || 'products'}`}>
+  <DetailComponent item={item} Content={Content} slugFolder="products" />
+</Layout>

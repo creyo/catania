@@ -1,0 +1,62 @@
+---
+import '../../styles/dubaipropertyhelp/who-we-are.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  title: string;
+  description?: string; // You can pass raw HTML or strings with <br/> here
+  subTitle?: string;
+  image?: string;
+  imageALT?: string;
+  button1Text?: string;
+  button1Link?: string;
+}
+
+const {
+  title,
+  description,
+  subTitle,
+  image,
+  imageALT,
+  button1Text,
+  button1Link,
+} = Astro.props;
+
+const imageSrc = resolveImage(image);
+---
+
+<section class="who-we-are">
+  <div class="who-we-are-container">
+    {imageSrc && (
+      <div class="who-we-are-media">
+        <div class="who-we-are-image-frame">
+          <Image 
+            class="who-we-are-image" 
+            src={imageSrc} 
+            alt={imageALT || ''} 
+            widths={[400, 800, 1200]}
+            sizes="(max-width: 768px) 100vw, 450px"
+            quality="high"
+            format="avif"
+            loading="lazy" 
+            decoding="async" 
+          />
+        </div>
+      </div>
+    )}
+    <div class="who-we-are-content">
+      {subTitle && <span class="who-we-are-badge">{subTitle}</span>}
+      <h2 class="who-we-are-title">{title}</h2>
+      {description && <div class="who-we-are-description" set:html={description} />}
+      {button1Text && button1Link && (
+        <div class="who-we-are-actions">
+          <a class="who-we-are-button" href={button1Link}>
+            {button1Text}
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      )}
+    </div>
+  </div>
+</section>

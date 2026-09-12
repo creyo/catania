@@ -1,0 +1,65 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/catania/blog-detail.css';
+
+const { item, Content } = Astro.props;
+const blog = item || {};
+const slugFolder = Astro.props.slugFolder;
+
+const imageSrc = resolveImage(blog.image);
+const title = blog.title || blog.name || "Blog Title";
+const subtitleText = blog.subTitle || blog.category || "";
+const finalButton1Link = blog.button1Text && !blog.button1Link ? '/contactus' : blog.button1Link;
+---
+
+<section class="blog-detail-section">
+  <div class="blog-detail-container">
+    <a href={`/${slugFolder}`} class="blog-detail-back-link">
+      ← Back to {slugFolder.charAt(0).toUpperCase() + slugFolder.slice(1)}
+    </a>
+    
+    <div class="blog-detail-grid">
+      {/* Blog Image Column */}
+      <div class="blog-detail-gallery">
+        {imageSrc && (
+          <div class="blog-detail-image-wrapper">
+            <Image 
+              class="blog-detail-image" 
+              src={imageSrc} 
+              alt={blog.imageAltText || title} 
+              widths={[400, 800, 1200]}
+              sizes="(max-width: 768px) 100vw, 600px"
+              quality="high"
+              format="avif"
+              loading="eager" 
+              decoding="async" 
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Blog Content Column */}
+      <div class="blog-detail-content">
+        {subtitleText && (
+          <span class="blog-detail-badge">{subtitleText}</span>
+        )}
+        <h1 class="blog-detail-title">{title}</h1>
+        <hr class="blog-detail-divider" />
+        
+        <div class="blog-detail-text">
+          {Content && <Content />}
+        </div>
+
+        {blog.button1Text && finalButton1Link && (
+          <div class="blog-detail-actions">
+            <a class="blog-detail-button" href={finalButton1Link}>
+              {blog.button1Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</section>

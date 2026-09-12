@@ -1,0 +1,154 @@
+---
+import '../../styles/catania/mission.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface MissionItem {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageALT?: string;
+  heading?: string;
+  subHeading?: string;
+  subTitle?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+}
+
+interface Props {
+  items: MissionItem[];
+}
+
+const { items = [] } = Astro.props;
+
+const isImageFile = (str?: string) => str && /\.(webp|jpg|jpeg|png|svg|avif|gif)$/i.test(str.trim());
+
+const heading = items.find((item) => item.heading && item.heading.trim() !== '')?.heading;
+const subTitle = items.find((item) => item.subHeading && item.subHeading.trim() !== '')?.subHeading 
+  || items.find((item) => item.subTitle && item.subTitle.trim() !== '')?.subTitle;
+
+const button1Item = items.find((item) => item.button1Text && !isImageFile(item.button1Text));
+const button1Text = button1Item?.button1Text;
+const button1Link = button1Item?.button1Link;
+
+const button2Item = items.find((item) => item.button2Text && !isImageFile(item.button2Text));
+const button2Text = button2Item?.button2Text;
+const button2Link = button2Item?.button2Link;
+
+// Process the items to resolve their image sources and fallback values identically to Feature.astro
+const resolvedItems = items.map(item => {
+  let imageFile = '';
+  if (isImageFile(item.image)) {
+    imageFile = item.image!;
+  } else if (isImageFile(item.button1Text)) {
+    imageFile = item.button1Text!;
+  }
+
+  let titleVal = item.title;
+  if (!titleVal && item.image && !isImageFile(item.image)) {
+    titleVal = item.image;
+  }
+
+  let descVal = item.description;
+  if (!descVal && item.imageALT) {
+    descVal = item.imageALT;
+  }
+
+  let altVal = item.imageALT && item.imageALT !== descVal ? item.imageALT : (titleVal || '');
+
+  return {
+    ...item,
+    title: titleVal || '',
+    description: descVal || '',
+    imageALT: altVal,
+    imageSrc: imageFile ? resolveImage(imageFile) : null
+  };
+});
+---
+
+{resolvedItems.length > 0 && (
+  <section class="mission-section">
+    <div class="mission-container">
+      {(heading || subTitle) && (
+        <div class="mission-header">
+          {subTitle && <span class="mission-badge">{subTitle}</span>}
+          {heading && <h2 class="mission-section-heading">{heading}</h2>}
+        </div>
+      )}
+
+      <div class="mission-grid">
+        {resolvedItems.map((item, index) => {
+          const itemTitle = item.title || '';
+          const itemSubTitle = item.subTitle || item.subHeading || '';
+          const itemDesc = item.description || '';
+
+          const isList = index > 0 || (!itemDesc.includes('\n\n') && itemDesc.includes('\n'));
+          const paragraphs = itemDesc ? itemDesc.split('\n\n').map(p => p.trim()).filter(Boolean) : [];
+          const listLines = itemDesc ? itemDesc.split('\n').map(l => l.trim()).filter(Boolean) : [];
+
+          return (
+            <div class="mission-col">
+              {itemSubTitle && <span class="mission-subtitle">{itemSubTitle}</span>}
+              {itemTitle && <h2 class="mission-title">{itemTitle}</h2>}
+              {item.imageSrc && (
+                <div class="mission-image-wrapper">
+                  <Image 
+                    class="mission-image" 
+                    src={item.imageSrc} 
+                    alt={item.imageALT || ''} 
+                    widths={[300, 600]}
+                    sizes="(max-width: 768px) 400px, 400px"
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
+              )}
+              
+              {!isList ? (
+                <div class="mission-paragraphs">
+                  {paragraphs.map((para) => (
+                    <p class="mission-description">{para}</p>
+                  ))}
+                </div>
+              ) : (
+                <ul class="mission-list">
+                  {listLines.map((line) => (
+                    <li class="mission-list-item">
+                      <span class="mission-list-icon">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                        </svg>
+                      </span>
+                      <span class="mission-list-text">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {(button1Text && button1Link) || (button2Text && button2Link) ? (
+        <div class="mission-actions">
+          {button1Text && button1Link && (
+            <a class="mission-button" href={button1Link}>
+              {button1Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+          {button2Text && button2Link && (
+            <a class="mission-button secondary" href={button2Link}>
+              {button2Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+  </section>
+)}
+
+

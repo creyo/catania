@@ -1,0 +1,139 @@
+/* =========================================
+   Body Component — Terms, Privacy, etc.
+   ========================================= */
+
+.body-section {
+  padding: 5rem 0 6rem;
+  background: #fff;
+  min-height: 60vh;
+}
+
+.body-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Hero image (optional) */
+.body-hero-image {
+  width: 100%;
+  margin-bottom: 2.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+}
+
+.body-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Badge / sub-heading */
+.body-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary, #1a6fc4);
+  background: rgba(26, 111, 196, 0.08);
+  border: 1px solid rgba(26, 111, 196, 0.2);
+  padding: 0.3rem 0.85rem;
+  border-radius: 99px;
+  margin-bottom: 1.25rem;
+}
+
+/* Main heading */
+.body-heading {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+  margin: 0 0 2rem;
+  letter-spacing: -0.02em;
+}
+
+/* Description area */
+.body-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.body-description p {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: #374151;
+  margin: 0;
+}
+
+/* Buttons */
+.body-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.body-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.body-btn-primary {
+  background: var(--color-primary, #1a6fc4);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26, 111, 196, 0.25);
+}
+
+.body-btn-primary:hover {
+  background: var(--color-primary-dark, #155ea0);
+  box-shadow: 0 6px 24px rgba(26, 111, 196, 0.35);
+  transform: translateY(-1px);
+}
+
+.body-btn-secondary {
+  background: transparent;
+  color: var(--color-primary, #1a6fc4);
+  border: 2px solid var(--color-primary, #1a6fc4);
+}
+
+.body-btn-secondary:hover {
+  background: var(--color-primary, #1a6fc4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .body-section {
+    padding: 3rem 0 4rem;
+  }
+
+  .body-heading {
+    font-size: 1.65rem;
+  }
+
+  .body-description p {
+    font-size: 0.95rem;
+  }
+
+  .body-actions {
+    flex-direction: column;
+  }
+
+  .body-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,61 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/catania/blog-detail.css';
+
+const { item, Content } = Astro.props;
+const data = item || {};
+const slugFolder = Astro.props.slugFolder || data.folder || '';
+
+const imageSrc = resolveImage(data.image || data.imageFeatured);
+const title = data.title || data.name || data.productName || "Item Details";
+const subtitleText = data.subTitle || data.category || data.subCategory || "";
+const backLink = slugFolder ? `/${slugFolder}` : '/';
+const backLabel = slugFolder ? slugFolder.replace(/-/g, ' ').replace(/\//g, ' > ') : 'Home';
+---
+
+<section class="blog-detail-section">
+  <div class="blog-detail-container">
+    <a href={backLink} class="blog-detail-back-link">
+      ← Back to {backLabel.charAt(0).toUpperCase() + backLabel.slice(1)}
+    </a>
+    
+    <div class="blog-detail-grid">
+      <div class="blog-detail-gallery">
+        {imageSrc && (
+          <div class="blog-detail-image-wrapper">
+            <Image 
+              class="blog-detail-image" 
+              src={imageSrc} 
+              alt={data.imageALT || data.imageAltText || title} 
+              widths={[400, 800, 1200]}
+              sizes="(max-width: 768px) 100vw, 600px"
+              quality="high"
+              format="avif"
+              loading="eager" 
+              decoding="async" 
+            />
+          </div>
+        )}
+      </div>
+
+      <div class="blog-detail-content">
+        {subtitleText && (
+          <span class="blog-detail-badge">{subtitleText}</span>
+        )}
+        <h1 class="blog-detail-title">{title}</h1>
+        <hr class="blog-detail-divider" />
+        
+        {data.shortDescription && (
+          <p class="blog-detail-description" style="font-size: 18px; line-height: 1.6; color: var(--color-primary-dark); font-weight: 500; margin-bottom: 20px;">
+            {data.shortDescription}
+          </p>
+        )}
+
+        <div class="blog-detail-text">
+          {Content && <Content />}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

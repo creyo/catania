@@ -1,0 +1,77 @@
+---
+import '../../styles/catania/home-top.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+interface Props {
+  title: string;
+  description?: string;
+  subTitle?: string;
+  image?: string;
+  imageALT?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+}
+
+const {
+  title,
+  description,
+  subTitle,
+  image,
+  imageALT,
+  button1Text,
+  button1Link,
+  button2Text,
+  button2Link,
+} = Astro.props;
+
+const imageSrc = resolveImage(image);
+---
+
+<section class="home-top">
+  <div class="home-top-container">
+    <div class="home-top-content">
+      {subTitle && <p class="home-top-subtitle">{subTitle}</p>}
+      <h1 class="home-top-title">{title}</h1>
+      {description && <p class="home-top-description">{description}</p>}
+      {(button1Text && button1Link) || (button2Text && button2Link) ? (
+        <div class="home-top-actions">
+          {button1Text && button1Link && (
+            <a class="home-top-button" href={button1Link}>
+              {button1Text}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" class="button-arrow" style="width:1.2em;height:1.2em;margin-left:0.8em;vertical-align:middle;">
+                <path d="M438.6 278.6l-160 160C272.4 444.9 264.2 448 256 448s-16.38-3.125-22.62-9.375c-12.5-12.5-12.5-32.75 0-45.25L338.8 288H32C14.33 288 .0016 273.7 .0016 256S14.33 224 32 224h306.8l-105.4-105.4c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l160 160C451.1 245.9 451.1 266.1 438.6 278.6z"/>
+              </svg>
+            </a>
+          )}
+          {button2Text && button2Link && (
+            <a class="home-top-button secondary" href={button2Link}>
+              {button2Text}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="button-arrow" style="width:1em;height:1em;margin-left:0.5em;vertical-align:middle;">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+
+    {imageSrc && (
+      <div class="home-top-media">
+        <Image 
+          class="home-top-image" 
+          src={imageSrc} 
+          alt={imageALT || ''} 
+          widths={[600, 1200, 1600]}
+          sizes="(max-width: 768px) 600px, 800px"
+          quality={75}
+          format="webp"
+          loading="eager" 
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+    )}
+  </div>
+</section>

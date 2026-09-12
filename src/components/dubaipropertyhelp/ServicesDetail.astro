@@ -1,0 +1,250 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/catania/services-detail.css';
+
+const { item, Content } = Astro.props;
+const data = item || {};
+const slugFolder = Astro.props.slugFolder;
+
+const imageSrc = resolveImage(data.image || data.imageFeatured);
+const title = data.heroTitle || data.title || data.name || "";
+const subtitleText = data.heroSubtitle || data.subTitle || data.category || "";
+const descriptionText = data.description || data.shortDescription || "";
+
+const backLink = slugFolder ? `/${slugFolder}` : '';
+const backLabel = slugFolder ? (slugFolder.charAt(0).toUpperCase() + slugFolder.slice(1)) : '';
+
+// Parse features (feature1Image, feature1Title, feature1Description, feature1ALT, etc.)
+const features: any[] = [];
+for (let i = 1; i <= 20; i++) {
+  const featureImage = data[`feature${i}Image`];
+  const featureTitle = data[`feature${i}Title`];
+  const featureDesc = data[`feature${i}Description`];
+  const featureALT = data[`feature${i}ALT`] || data[`feature${i}Alt`];
+  if (featureTitle || featureDesc || featureImage) {
+    features.push({
+      image: featureImage ? resolveImage(featureImage) : null,
+      alt: featureALT || featureTitle || title,
+      title: featureTitle,
+      description: featureDesc,
+    });
+  }
+}
+
+// Parse process
+const processSubtitle = data.ourProcessSubtitle || "";
+const processTitle = data.ourProcessTitle || "";
+const processDescription = data.ourProcessDescription || "";
+const hasProcess = Boolean(processTitle || processDescription);
+
+// Parse CTAs
+const ctas: any[] = [];
+for (let i = 1; i <= 20; i++) {
+  const ctaTitle = data[`cTA${i}Title`] || data[`cta${i}Title` as keyof typeof data];
+  const ctaDesc = data[`cTA${i}Description`] || data[`cta${i}Description` as keyof typeof data];
+  const icon = data[`cTA${i}Icon`] || data[`cta${i}Icon` as keyof typeof data];
+  if (ctaTitle || ctaDesc || icon) {
+    ctas.push({
+      icon,
+      title: ctaTitle,
+      description: ctaDesc,
+    });
+  }
+}
+
+const footNote = data.footNote || "";
+const finalButton1Link = data.button1Link;
+
+function renderMarkdownLinks(text: string): string {
+  if (!text) return '';
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function renderMarkdown(text: string): string {
+  if (!text) return '';
+  let html = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  const lines = html.split('\n');
+  const result: string[] = [];
+  let inList = false;
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    if (trimmed.startsWith('- ')) {
+      if (!inList) { result.push('<ul class="section-list">'); inList = true; }
+      result.push(`<li>${trimmed.slice(2).trim()}</li>`);
+    } else {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(line);
+    }
+  }
+  if (inList) result.push('</ul>');
+  return result.join('\n');
+}
+
+const isRichServicePage = Boolean(features.length > 0 || hasProcess || ctas.length > 0 || data.heroTitle);
+---
+
+<div class="service-detail-page">
+  {isRichServicePage ? (
+    <>
+      <section class="service-detail-hero">
+        {backLink && (
+          <div class="back-wrap container">
+            <a href={backLink} class="service-detail-back-link">
+              ← Back to {backLabel}
+            </a>
+          </div>
+        )}
+        <div class="service-detail-hero__inner">
+          {title && <h1 set:html={title} />}
+          {subtitleText && <p class="service-detail-hero__subtitle" set:html={subtitleText} />}
+          {descriptionText && <p class="service-detail-hero__main-description" set:html={descriptionText} />}
+        </div>
+      </section>
+
+      {features.length > 0 && (
+        <section class="service-detail-features">
+          {features.map((feature, index) => (
+            <div class="feature-row">
+              <div class="feature-image-col">
+                {feature.image && (
+                  <div class="feature-image-wrapper">
+                    <Image
+                      class="feature-image"
+                      src={feature.image}
+                      alt={feature.alt || feature.title || title}
+                      widths={[400, 800, 1200]}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      quality="high"
+                      format="avif"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                    />
+                  </div>
+                )}
+              </div>
+              <div class="feature-content-col">
+                {feature.title && <h2 set:html={feature.title} />}
+                {feature.description && (
+                  <div class="section-desc" set:html={renderMarkdown(feature.description)} />
+                )}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {hasProcess && (
+        <section class="service-detail-process">
+          <div class="service-detail-process__container">
+            {processSubtitle && <span class="process-subtitle" set:html={processSubtitle} />}
+            {processTitle && <h2 set:html={processTitle} />}
+            {processDescription && <p class="process-description" set:html={processDescription} />}
+          </div>
+        </section>
+      )}
+
+      {ctas.length > 0 && (
+        <section class="service-detail-ctas">
+          <div class="service-detail-ctas__grid">
+            {ctas.map((cta) => (
+              <div class="cta-item">
+                <div class="cta-icon">
+                  {cta.icon ? (
+                    <span set:html={cta.icon} />
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  )}
+                </div>
+                <div class="cta-text">
+                  {cta.title && <h3 set:html={cta.title} />}
+                  {cta.description && <p set:html={cta.description} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {Content && (
+        <section class="mdx-body">
+          <div class="mdx-body__inner">
+            <Content />
+          </div>
+        </section>
+      )}
+
+      {footNote && (
+        <section class="service-detail-footer-note">
+          <div class="footer-note-content" set:html={renderMarkdownLinks(footNote)} />
+        </section>
+      )}
+
+      {data.button1Text && finalButton1Link && (
+        <div class="service-detail-actions">
+          <a class="service-detail-button" href={finalButton1Link}>
+            {data.button1Text}
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      )}
+    </>
+  ) : (
+    <section class="service-detail-section">
+      <div class="service-detail-container">
+        {backLink && (
+          <a href={backLink} class="service-detail-back-link">
+            ← Back to {backLabel}
+          </a>
+        )}
+        
+        <div class="service-detail-grid">
+          <div class="service-detail-gallery">
+            {imageSrc && (
+              <div class="service-detail-image-wrapper">
+                <Image 
+                  class="service-detail-image" 
+                  src={imageSrc} 
+                  alt={data.imageALT || data.imageAltText || title} 
+                  widths={[400, 800, 1200]}
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  quality="high"
+                  format="avif"
+                  loading="eager" 
+                  decoding="async" 
+                />
+              </div>
+            )}
+          </div>
+
+          <div class="service-detail-content">
+            {subtitleText && (
+              <span class="service-detail-badge">{subtitleText}</span>
+            )}
+            {title && <h1 class="service-detail-title">{title}</h1>}
+            <hr class="service-detail-divider" />
+            
+            {descriptionText && (
+              <p class="service-detail-description">
+                {descriptionText}
+              </p>
+            )}
+
+            <div class="service-detail-text">
+              {Content && <Content />}
+            </div>
+
+            {data.button1Text && finalButton1Link && (
+              <div class="service-detail-actions">
+                <a class="service-detail-button" href={finalButton1Link}>
+                  {data.button1Text}
+                  <span class="btn-arrow">→</span>
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+</div>

@@ -1,0 +1,87 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/steelcraft/who-we-are.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  subTitle?: string;
+  image?: string;
+  imageALT?: string;
+  button1Text?: string;
+  button1Link?: string;
+}
+
+const {
+  title,
+  description,
+  subTitle,
+  image,
+  imageALT,
+  button1Text,
+  button1Link,
+} = Astro.props;
+
+const imageSrc = resolveImage(image);
+---
+
+<section class="hero2">
+  <div class="container hero2__container reveal-on-scroll">
+    <div class="hero2__content">
+      {subTitle && <p class="hero2__subtitle">{subTitle}</p>}
+      <h2 class="hero2__title">{title}</h2>
+      {description && <p class="hero2__description">{description}</p>}
+    </div>
+    
+    <div class="hero2__visual">
+      <div class="hero2__image-wrapper">
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={imageALT || title || 'Industrial Baking Line'}
+            class="hero2__image"
+            widths={[400, 800, 1200]}
+            sizes="(max-width: 800px) 100vw, 800px"
+            format="webp"
+            quality="high"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <img
+            src="/images/catania-homepage-section-1-image-2.webp"
+            alt={imageALT || title || 'Industrial Baking Line'}
+            class="hero2__image"
+            loading="lazy"
+          />
+        )}
+      </div>
+    </div>
+    
+    <div class="hero2__spacer"></div>
+  </div>
+</section>
+
+<script>
+  function setupReveal() {
+    const observerOptions = {
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+      observer.observe(el);
+    });
+  }
+
+  setupReveal();
+  document.addEventListener('astro:after-swap', setupReveal);
+</script>

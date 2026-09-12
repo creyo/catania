@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+import { frontmatter as settingsFrontmatter } from '../content/settings.mdx';
+
+const activeTheme = (settingsFrontmatter.theme || 'catania').toLowerCase();
+const faviconPath = `/${activeTheme}/favicon.ico`;
+const colorTheme = (settingsFrontmatter.color || 'blue').toLowerCase();
+
+// Automatically bundle ALL theme Headers & Footers at build time
+const headerModules: Record<string, any> = import.meta.glob('../components/*/Header.astro', { eager: true });
+const footerModules: Record<string, any> = import.meta.glob('../components/*/Footer.astro', { eager: true });
+
+// Pick the active theme's Header & Footer, with fallback to catania if not found
+const Header = headerModules[`../components/${activeTheme}/Header.astro`]?.default 
+  || headerModules['../components/catania/Header.astro']?.default;
+
+const Footer = footerModules[`../components/${activeTheme}/Footer.astro`]?.default 
+  || footerModules['../components/catania/Footer.astro']?.default;
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = settingsFrontmatter.name, description = "Professional Stainless Steel Kitchen Fabrication" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" dir="ltr" data-color={colorTheme}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href={faviconPath} />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+  
+    {Header && <Header settings={settingsFrontmatter} />}
+    <main id="main-content">
+      <slot />
+    </main>
+    {Footer && <Footer settings={settingsFrontmatter} />}
+  </body>
+</html>

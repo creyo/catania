@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Top from '../components/catania/Top.astro';
+import Feature from '../components/catania/Feature.astro';
+import LastBlock from '../components/catania/LastBlock.astro';
+import { frontmatter } from '../content/services.mdx';
+
+const topItem = frontmatter.data.find((c) => c.section === 'Top' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+const servicesItems = frontmatter.data.filter((c) => c.section === 'Services' && (c.publish || 'Y').toUpperCase() === 'Y').sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+const lastblockItem = frontmatter.data.find((c) => c.section === 'LastBlock' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+
+---
+<Layout
+  title={frontmatter.metaTitle || "Services"}
+  description={frontmatter.metaDescription || "Default description"}
+>
+{topItem && <Top {...topItem} folderPath="services" />}
+{servicesItems.length > 0 && <Feature items={servicesItems} folderPath="services" />}
+{lastblockItem && <LastBlock {...lastblockItem} folderPath="services" />}
+
+</Layout>

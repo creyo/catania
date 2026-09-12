@@ -1,0 +1,92 @@
+---
+import '../../styles/catania/contact.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface ContactItem {
+  title?: string;
+  heading?: string;
+  subTitle?: string;
+  subHeading?: string;
+  description?: string;
+  image?: string;
+  imageALT?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+}
+
+interface Props extends ContactItem {
+  items?: ContactItem[];
+}
+
+const props = Astro.props;
+const items: ContactItem[] = props.items && props.items.length > 0 ? props.items : [props];
+
+const mainHeading = items.find((i) => i.heading)?.heading || props.heading || props.title || 'Contact Us';
+const mainSubHeading = items.find((i) => i.subHeading)?.subHeading || items.find((i) => i.subTitle)?.subTitle || props.subHeading || props.subTitle;
+
+const resolvedItems = items.map((item) => ({
+  title: item.title,
+  subTitle: item.subTitle,
+  description: item.description,
+  imageALT: item.imageALT,
+  imageSrc: resolveImage(item.image),
+  button1Text: item.button1Text,
+  button1Link: item.button1Link,
+  button2Text: item.button2Text,
+  button2Link: item.button2Link,
+}));
+---
+
+<section class="contact-section">
+  <div class="contact-container">
+    {(mainHeading || mainSubHeading) && (
+      <div class="contact-header">
+        {mainSubHeading && <span class="contact-badge">{mainSubHeading}</span>}
+        {mainHeading && <h2 class="contact-heading">{mainHeading}</h2>}
+      </div>
+    )}
+
+    <div class="contact-grid">
+      {resolvedItems.map((item) => (
+        <div class="contact-card">
+          {item.imageSrc && (
+            <div class="contact-image-wrapper">
+              <Image
+                class="contact-image"
+                src={item.imageSrc}
+                alt={item.imageALT || ''}
+                widths={[300, 600]}
+                sizes="(max-width: 768px) 100vw, 400px"
+                quality="mid"
+                format="avif"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          )}
+          {item.title && <h3 class="contact-card-title">{item.title}</h3>}
+          {item.description && (
+            <div class="contact-card-description" set:html={item.description.replace(/\n/g, '<br/>')} />
+          )}
+          {(item.button1Text || item.button2Text) && (
+            <div class="contact-card-actions">
+              {item.button1Text && item.button1Link && (
+                <a class="contact-button" href={item.button1Link}>
+                  {item.button1Text}
+                </a>
+              )}
+              {item.button2Text && item.button2Link && (
+                <a class="contact-button secondary" href={item.button2Link}>
+                  {item.button2Text}
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

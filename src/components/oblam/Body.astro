@@ -1,0 +1,96 @@
+---
+import '../../styles/catania/body.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  heading?: string;
+  subHeading?: string;
+  title?: string;
+  subTitle?: string;
+  description?: string;
+  image?: string;
+  imageALT?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+  folderPath?: string;
+}
+
+const {
+  heading,
+  subHeading,
+  title,
+  subTitle,
+  description,
+  image,
+  imageALT,
+  button1Text,
+  button1Link,
+  button2Text,
+  button2Link,
+} = Astro.props;
+
+const imageSrc = resolveImage(image);
+
+const descriptionLines = description ? description.split('\n') : [];
+---
+
+<section class="body-section" id="body-content">
+  <div class="body-container">
+
+    {imageSrc && (
+      <div class="body-hero-image">
+        <Image
+          src={imageSrc}
+          alt={imageALT || title || ''}
+          widths={[600, 1200, 1800]}
+          sizes="(max-width: 768px) 100vw, 1200px"
+          quality="mid"
+          format="avif"
+          loading="eager"
+          decoding="async"
+          class="body-image"
+        />
+      </div>
+    )}
+
+    <div class="body-content">
+      {(subHeading || subTitle) && (
+        <span class="body-badge">{subHeading || subTitle}</span>
+      )}
+
+      {heading
+        ? <h1 class="body-heading">{heading}</h1>
+        : title && <h1 class="body-heading">{title}</h1>
+      }
+
+      {descriptionLines.length > 0 && (
+        <div class="body-description">
+          {descriptionLines.map((line) =>
+            line.trim() === ''
+              ? <br />
+              : <p>{line}</p>
+          )}
+        </div>
+      )}
+
+      {(button1Text && button1Link) || (button2Text && button2Link) ? (
+        <div class="body-actions">
+          {button1Text && button1Link && (
+            <a class="body-btn body-btn-primary" href={button1Link} id="body-btn-1">
+              {button1Text}
+            </a>
+          )}
+          {button2Text && button2Link && (
+            <a class="body-btn body-btn-secondary" href={button2Link} id="body-btn-2">
+              {button2Text}
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+
+  </div>
+</section>

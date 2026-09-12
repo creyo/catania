@@ -1,0 +1,185 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/steelcraft/industrial-bakery-detail.css';
+
+const { item, Content } = Astro.props;
+const data = item || {};
+const slugFolder = Astro.props.slugFolder || data.folder;
+
+const imageSrc = resolveImage(data.image || data.imageFeatured);
+const title = data.heroTitle || data.title || data.name || "";
+const subtitleText = data.heroSubtitle || data.subTitle || data.category || "";
+const descriptionText = data.description || "";
+
+const backLink = slugFolder ? `/${slugFolder}` : '';
+const backLabel = slugFolder ? slugFolder.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : '';
+
+const features = [];
+for (let i = 1; i <= 20; i++) {
+  const featureImage = data[`feature${i}Image`];
+  const featureTitle = data[`feature${i}Title`];
+  const featureDesc = data[`feature${i}Description`];
+  const featureALT = data[`feature${i}ALT`] || data[`feature${i}Alt`];
+  if (featureTitle || featureDesc || featureImage) {
+    features.push({
+      image: featureImage ? resolveImage(featureImage) : null,
+      alt: featureALT || featureTitle || title,
+      title: featureTitle,
+      description: featureDesc,
+    });
+  }
+}
+
+const processSubtitle = data.ourProcessSubtitle || "";
+const processTitle = data.ourProcessTitle || "";
+const processDescription = data.ourProcessDescription || "";
+const hasProcess = processTitle || processDescription;
+
+const ctas = [];
+for (let i = 1; i <= 20; i++) {
+  const ctaTitle = data[`cTA${i}Title`] || data[`cta${i}Title` as keyof typeof data];
+  const ctaDesc = data[`cTA${i}Description`] || data[`cta${i}Description` as keyof typeof data];
+  const icon = data[`cTA${i}Icon`] || data[`cta${i}Icon` as keyof typeof data];
+  if (ctaTitle || ctaDesc || icon) {
+    ctas.push({
+      icon,
+      title: ctaTitle,
+      description: ctaDesc,
+    });
+  }
+}
+
+const footNote = data.footNote || "";
+const finalButton1Link = data.button1Text && !data.button1Link ? '/contactus' : data.button1Link;
+
+function renderMarkdownLinks(text: string): string {
+  if (!text) return '';
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function renderMarkdown(text: string): string {
+  if (!text) return '';
+  let html = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  const lines = html.split('\n');
+  const result: string[] = [];
+  let inList = false;
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    if (trimmed.startsWith('- ')) {
+      if (!inList) { result.push('<ul class="section-list">'); inList = true; }
+      result.push(`<li>${trimmed.slice(2).trim()}</li>`);
+    } else {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(line);
+    }
+  }
+  if (inList) result.push('</ul>');
+  return result.join('\n');
+}
+---
+
+<div class="bakery-page">
+  <section class="bakery-hero">
+    {backLink && (
+      <div class="back-wrap container">
+        <a href={backLink} class="back-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to {backLabel}
+        </a>
+      </div>
+    )}
+    <div class="bakery-hero__inner">
+      <h1 set:html={data.heroTitle || title} />
+      {subtitleText && <p class="bakery-hero__subtitle" set:html={subtitleText} />}
+      {descriptionText && <p class="bakery-hero__main-description" set:html={descriptionText} />}
+    </div>
+  </section>
+
+  {features.length > 0 && (
+    <section class="bakery-features">
+      {features.map((feature, index) => (
+        <div class="feature-row">
+          <div class="feature-image-col">
+            {feature.image && (
+              <div class="feature-image-wrapper">
+                <Image
+                  class="feature-image"
+                  src={feature.image}
+                  alt={feature.alt || feature.title || title}
+                  widths={[400, 800, 1200]}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  quality="high"
+                  format="avif"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              </div>
+            )}
+          </div>
+          <div class="feature-content-col">
+            {feature.title && <h2 set:html={feature.title} />}
+            {feature.description && (
+              <div class="section-desc" set:html={renderMarkdown(feature.description)} />
+            )}
+          </div>
+        </div>
+      ))}
+    </section>
+  )}
+
+  {hasProcess && (
+    <section class="bakery-process">
+      <div class="bakery-process__container">
+        {processSubtitle && <span class="process-subtitle" set:html={processSubtitle} />}
+        {processTitle && <h2 set:html={processTitle} />}
+        {processDescription && <p class="process-description" set:html={processDescription} />}
+      </div>
+    </section>
+  )}
+
+  {ctas.length > 0 && (
+    <section class="bakery-ctas">
+      <div class="bakery-ctas__grid">
+        {ctas.map((cta) => (
+          <div class="cta-item">
+            <div class="cta-icon">
+              {cta.icon ? (
+                <span set:html={cta.icon} />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              )}
+            </div>
+            <div class="cta-text">
+              {cta.title && <h3 set:html={cta.title} />}
+              {cta.description && <p set:html={cta.description} />}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {Content && (
+    <section class="mdx-body">
+      <div class="mdx-body__inner">
+        <Content />
+      </div>
+    </section>
+  )}
+
+  {footNote && (
+    <section class="bakery-footer-note">
+      <div class="footer-note-content" set:html={renderMarkdownLinks(footNote)} />
+    </section>
+  )}
+
+  {data.button1Text && finalButton1Link && (
+      <div class="ind-bakery-detail-actions">
+      <a class="ind-bakery-detail-button" href={finalButton1Link}>
+        {data.button1Text}
+        <span class="btn-arrow">→</span>
+      </a>
+    </div>
+  )}
+</div>

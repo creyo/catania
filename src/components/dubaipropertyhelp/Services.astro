@@ -1,0 +1,116 @@
+---
+import '../../styles/catania/services.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  heading?: string;
+  subTitle?: string;
+  description?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+  items?: any[];
+  folderPath?: string;
+}
+
+const {
+  heading,
+  subTitle,
+  description,
+  button1Text,
+  button1Link,
+  button2Text,
+  button2Link,
+  items,
+  folderPath
+} = Astro.props;
+
+const finalButton1Link = button1Link;
+const finalButton2Link = button2Link;
+
+// Load services dynamically if not passed via props
+let services = (items || []).filter(p => p && (p.publish === 'Y' || p.publish === 'y'));
+if (!services || services.length === 0) {
+  const serviceFiles = import.meta.glob('../../content/services/*.mdx', { eager: true });
+  services = Object.values(serviceFiles)
+    .map(p => (p as any).frontmatter)
+    .filter(p => p && (p.publish === 'Y' || p.publish === 'y'))
+    .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+}
+---
+
+{services.length > 0 && (
+  <section class="service-threecolumn">
+    <div class="service-threecolumn-container">
+      {(heading || description) && (
+        <div class="service-threecolumn-header">
+          {heading && (
+            <h2 class="service-threecolumn-heading">{heading}</h2>
+          )}
+          {description && (
+            <p class="service-threecolumn-section-description">{description}</p>
+          )}
+        </div>
+      )}
+
+      <div class="service-threecolumn-grid">
+        {services.map((item) => {
+          const imageSrc = resolveImage(item.image || item.imageFeatured);
+          const name = item.title || item.name || "";
+          const targetFolder = item.folder || folderPath;
+          const itemHref = targetFolder ? `/${targetFolder}/${item.slug}` : `/${item.slug}`;
+
+          return (
+            <a href={itemHref} class="service-threecolumn-card">
+              {imageSrc && (
+                <div class="service-threecolumn-image-wrapper">
+                  <Image 
+                    class="service-threecolumn-image" 
+                    src={imageSrc} 
+                    alt={item.imageAltText || item.imageALT || name} 
+                    widths={[300, 600, 900]}
+                    sizes="(max-width: 768px) 400px, 400px"
+                    quality="mid"
+                    format="avif"
+                    fetchpriority="high"
+                    loading="eager" 
+                    decoding="async" 
+                  />
+                </div>
+              )}
+              {item.category && (
+                <span class="service-category">{item.category}</span>
+              )}
+              {name && <h3 class="service-threecolumn-title">{name}</h3>}
+              {(item.shortDescription || item.description) && (
+                <p class="service-threecolumn-description">
+                  {item.shortDescription || (typeof item.description === 'string' ? item.description.substring(0, 150) + "..." : '')}
+                </p>
+              )}
+              <span class="card-link-text">Read More</span>
+            </a>
+          );
+        })}
+      </div>
+
+      {(button1Text && finalButton1Link) || (button2Text && finalButton2Link) ? (
+        <div class="service-threecolumn-actions">
+          {button1Text && finalButton1Link && (
+            <a class="service-threecolumn-button" href={finalButton1Link}>
+              {button1Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+          {button2Text && finalButton2Link && (
+            <a class="service-threecolumn-button secondary" href={finalButton2Link}>
+              {button2Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+  </section>
+)}

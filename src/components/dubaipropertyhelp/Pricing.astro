@@ -1,0 +1,135 @@
+---
+import '../../styles/catania/pricing.css';
+
+interface PricingItem {
+  planName?: string;
+  amount?: string;
+  features?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  order?: string;
+  publish?: string;
+  toggleButton?: string;
+  subTitle?: string;
+  title?: string;
+  description?: string;
+}
+
+interface Props {
+  items: PricingItem[];
+}
+
+const { items = [] } = Astro.props;
+
+// Grab header fields from the first item that has them (order 1)
+const headerItem = items.find(i => i.title || i.subTitle || i.description || i.toggleButton) || items[0] || {};
+const subTitle     = headerItem.subTitle    || '';
+const title        = headerItem.title       || '';
+const description  = headerItem.description || '';
+const toggleLabels = headerItem.toggleButton
+  ? headerItem.toggleButton.split(',').map(t => t.trim()).filter(Boolean)
+  : [];
+
+// Sort plans by order
+const plans = [...items].sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+
+// Build monthly / yearly amounts per plan
+// amount field stores "monthly,yearly" or a single value
+function parseAmounts(raw: string | undefined): { monthly: string; yearly: string } {
+  if (!raw) return { monthly: '—', yearly: '—' };
+  const parts = raw.split(',').map(p => p.trim());
+  return { monthly: parts[0] || '—', yearly: parts[1] || parts[0] || '—' };
+}
+---
+
+<section class="pricing-section">
+  <div class="pricing-container">
+
+    {(subTitle || title || description || toggleLabels.length > 0) && (
+      <div class="pricing-header">
+        {subTitle && <span class="pricing-subtitle">{subTitle}</span>}
+        {title    && <h2   class="pricing-title">{title}</h2>}
+        {description && <p class="pricing-description">{description}</p>}
+
+        {toggleLabels.length >= 2 && (
+          <div class="pricing-toggle-wrap" id="pricing-toggle">
+            {toggleLabels.map((label, idx) => (
+              <button
+                class={`pricing-toggle-btn${idx === 0 ? ' active' : ''}`}
+                data-period={label.toLowerCase()}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    <div class="pricing-grid">
+      {plans.map((plan) => {
+        const order = Number(plan.order || 999);
+        const isPopular = order === 2;
+        const { monthly, yearly } = parseAmounts(plan.amount);
+        const featureList = plan.features
+          ? plan.features.split(',').map(f => f.trim()).filter(Boolean)
+          : [];
+        const hasButton = plan.buttonText && plan.buttonLink;
+
+        return (
+          <div class={`pricing-card${isPopular ? ' popular' : ''}`}>
+            {isPopular && <span class="pricing-popular-badge">Most Popular</span>}
+
+            <div class="pricing-plan-name">{plan.planName || 'Plan'}</div>
+
+            <div class="pricing-amount-row">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-amount" data-monthly={monthly} data-yearly={yearly}>
+                {monthly}
+              </span>
+              <span class="pricing-period">/mo</span>
+            </div>
+
+            {featureList.length > 0 && (
+              <ul class="pricing-features">
+                {featureList.map(feature => (
+                  <li class="pricing-feature-item">
+                    <span class="pricing-check">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {hasButton && (
+              <a class="pricing-btn" href={plan.buttonLink}>
+                {plan.buttonText}
+              </a>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<script>
+  const toggle = document.getElementById('pricing-toggle');
+  if (toggle) {
+    const btns = toggle.querySelectorAll<HTMLButtonElement>('.pricing-toggle-btn');
+    const amounts = document.querySelectorAll<HTMLSpanElement>('.pricing-amount');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const period = btn.dataset.period as 'monthly' | 'yearly';
+        amounts.forEach(el => {
+          el.textContent = period === 'yearly'
+            ? (el.dataset.yearly || el.dataset.monthly || '—')
+            : (el.dataset.monthly || '—');
+        });
+      });
+    });
+  }
+</script>

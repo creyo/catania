@@ -1,39 +1,26 @@
 {
-	"name": "catania",
-	"description": "Build a personal website, blog, or portfolio with Astro.",
-	"cloudflare": {
-		"label": "Astro Framework Starter",
-		"products": [
-			"Workers"
-		],
-		"categories": [],
-		"preview_icon_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/394ca3c9-d351-4036-035a-9f6dfa26dd00/public",
-		"preview_image_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/f40a6577-eed5-4f3e-cef4-b5ef0a1be100/preview",
-		"publish": true
-	},
-	"dependencies": {
-		"@astrojs/cloudflare": "12.6.12",
-		"@astrojs/mdx": "4.3.13",
-		"@astrojs/rss": "4.0.14",
-		"@astrojs/sitemap": "3.6.1",
-		"astro": "5.16.9",
-		"typescript": "5.9.3"
-	},
-	"devDependencies": {
-		"wrangler": "4.88.0"
-	},
-	"engines": {
-		"node": ">=22"
-	},
-	"private": true,
-	"scripts": {
-		"astro": "astro",
-		"build": "astro build",
-		"cf-typegen": "wrangler types",
-		"check": "astro build && tsc && wrangler deploy --dry-run",
-		"deploy": "wrangler deploy",
-		"dev": "astro dev",
-		"preview": "astro build && wrangler dev"
-	},
-	"type": "module"
+  "name": "",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/fetch-sections.js && node scripts/generate-pages-from-mdx.js && astro dev",
+    "build": "node scripts/fetch-sections.js && node scripts/generate-pages-from-mdx.js && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^6.0.1",
+    "@fontsource/poppins": "^5.2.7",
+    "astro": "^6.3.7",
+    "csv-parse": "^6.2.1",
+    "esbuild": "^0.28.1",
+    "gray-matter": "^4.0.3",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.131.1"
+  }
 }

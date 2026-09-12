@@ -1,0 +1,109 @@
+---
+import '../../styles/steelcraft/commercial-kitchens.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  heading?: string;
+  subTitle?: string;
+  description?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+}
+
+const {
+  heading = "Commercial Kitchens",
+  subTitle,
+  description,
+  button1Text,
+  button1Link,
+  button2Text,
+  button2Link,
+  items,
+  folderPath
+} = Astro.props;
+
+const finalButton1Link = button1Text && !button1Link ? '/contactus' : button1Link;
+const finalButton2Link = button2Text && !button2Link ? '/contactus' : button2Link;
+
+let commercialKitchens = items || [];
+if (!commercialKitchens || commercialKitchens.length === 0) {
+  const mdxFiles = import.meta.glob('../../content/industries/commercial-kitchens/*.mdx', { eager: true });
+  commercialKitchens = Object.values(mdxFiles)
+    .map(p => (p as any).frontmatter)
+    .filter(p => p && (p.publish === 'Y' || p.publish === 'y' || !p.publish))
+    .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+}
+---
+
+{commercialKitchens.length > 0 && (
+  <section class="commercial-kitchens">
+    <div class="commercial-kitchens-container">
+      {(heading || description) && (
+        <div class="commercial-kitchens-header">
+          {heading && (
+            <h2 class="commercial-kitchens-heading">{heading}</h2>
+          )}
+          {description && (
+            <p class="commercial-kitchens-description-text">{description}</p>
+          )}
+        </div>
+      )}
+
+      <div class="commercial-kitchens-grid">
+        {commercialKitchens.map((item) => {
+          const imageSrc = resolveImage(item.image || item.imageFeatured);
+          const name = item.title || item.name || "Commercial Kitchen";
+          const targetFolder = item.folder || folderPath || 'industries/commercial-kitchens';
+
+          return (
+            <a href={`/${targetFolder}/${item.slug}`} class="commercial-kitchens-card">
+              {imageSrc && (
+                <div class="commercial-kitchens-image-wrapper">
+                  <Image
+                    class="commercial-kitchens-image"
+                    src={imageSrc}
+                    alt={item.imageALT || item.imageAltText || name}
+                    widths={[300, 600, 900]}
+                    sizes="(max-width: 768px) 400px, 400px"
+                    quality="mid"
+                    format="avif"
+                    fetchpriority="high"
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
+              )}
+              <h3 class="commercial-kitchens-title">{name}</h3>
+              {item.description ? (
+                <p class="commercial-kitchens-description">
+                  {item.description.substring(0, 150) + "..."}
+                </p>
+              ) : null}
+              <span class="card-link-text">Read More</span>
+            </a>
+          );
+        })}
+      </div>
+
+      {(button1Text && finalButton1Link) || (button2Text && finalButton2Link) ? (
+        <div class="commercial-kitchens-actions">
+          {button1Text && finalButton1Link && (
+            <a class="commercial-kitchens-button" href={finalButton1Link}>
+              {button1Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+          {button2Text && finalButton2Link && (
+            <a class="commercial-kitchens-button secondary" href={finalButton2Link}>
+              {button2Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+  </section>
+)}

@@ -1,0 +1,255 @@
+---
+import { Image } from 'astro:assets';
+import '../../styles/steelcraft/header.css';
+import { parseMenuString, parseFlatMenu } from '../../utils/menuParser';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  settings?: Record<string, string>;
+}
+
+const { settings } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+const logoAsset = resolveImage(settings?.logo);
+
+const navItems = parseMenuString(settings?.topMenu);
+const socialLinks = parseFlatMenu(settings?.socialButton || settings?.socialLinks);
+
+const isActive = (href?: string) => {
+  if (!href) return false;
+  if (href === '/' || href === '#') return currentPath === '/';
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+};
+---
+
+<header class="header">
+  <div class="header-container">
+    <!-- Left: Logo -->
+    <a href="/" class="logo" aria-label={`${settings?.name || 'Steelcraft'} home`}>
+      {logoAsset && (
+        <Image src={logoAsset} alt={`${settings?.name || 'Steelcraft'} logo`} loading="eager" fetchpriority="high" />
+      )}
+    </a>
+
+    <!-- Center: Desktop Links -->
+    <nav class="nav-desktop" aria-label="Desktop navigation">
+      <ul class="nav-list">
+        {
+          navItems.map((item) => (
+            <li class={item.subItems ? 'has-dropdown' : ''}>
+              {item.subItems ? (
+                <a href="#" class="nav-link dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
+                  {item.label}
+                  <svg class="dropdown-arrow" viewBox="0 0 20 20" width="12" height="12" fill="currentColor">
+                    <path d="M5.2 7.6L10 12.4l4.8-4.8 1.2 1.2-6 6-6-6 1.2-1.2z"/>
+                  </svg>
+                </a>
+                <ul class="dropdown-menu">
+                  {item.subItems.map(subItem => (
+                    <li><a href={subItem.href}>{subItem.label}</a></li>
+                  ))}
+                </ul>
+              ) : (
+                <a href={item.href} class={`nav-link ${isActive(item.href) ? 'is-active' : ''}`.trim()}>
+                  {item.label}
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <!-- Right: Social & Contact Icons + Hamburger (Mobile Only) -->
+    <div class="header-right">
+      <ul class="social-list">
+        {socialLinks.length > 0 ? (
+          socialLinks.map((item) => {
+            const label = item.label.toLowerCase();
+            const href = item.href;
+
+            if (label.includes('instagram') || href.includes('instagram.com')) {
+              return (
+                <li>
+                  <a href={href} aria-label="Instagram" class="social-link" target="_blank" rel="noreferrer">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M170.663 256.157c-.083-47.121 38.055-85.4 85.167-85.483 47.121-.092 85.407 38.03 85.499 85.16.091 47.129-38.047 85.4-85.176 85.492-47.112.09-85.399-38.039-85.49-85.169zm-46.108.091c.141 72.602 59.106 131.327 131.69 131.186 72.592-.141 131.35-59.09 131.209-131.692-.141-72.577-59.114-131.335-131.715-131.194-72.585.141-131.325 59.115-131.184 131.7zm237.104-137.091c.033 16.953 13.817 30.681 30.772 30.648 16.961-.033 30.689-13.811 30.664-30.764-.033-16.954-13.818-30.69-30.78-30.657-16.962.033-30.689 13.818-30.656 30.773zm-208.696 345.4c-24.958-1.087-38.511-5.234-47.543-8.709-11.961-4.629-20.496-10.178-29.479-19.094-8.966-8.95-14.532-17.46-19.202-29.397-3.508-9.032-7.73-22.569-8.9-47.527-1.269-26.982-1.559-35.077-1.683-103.432-.133-68.339.116-76.434 1.294-103.441 1.069-24.942 5.242-38.512 8.709-47.536 4.628-11.977 10.161-20.496 19.094-29.479 8.949-8.982 17.459-14.532 29.403-19.202 9.025-3.525 22.561-7.714 47.511-8.9 26.998-1.277 35.085-1.551 103.423-1.684 68.353-.132 76.448.108 103.456 1.295 24.94 1.086 38.51 5.217 47.527 8.709 11.968 4.628 20.503 10.144 29.478 19.094 8.974 8.95 14.54 17.443 19.21 29.412 3.524 9 7.714 22.553 8.892 47.494 1.285 26.999 1.576 35.095 1.7 103.433.132 68.355-.117 76.451-1.302 103.441-1.087 24.958-5.226 38.52-8.709 47.561-4.629 11.952-10.161 20.487-19.103 29.471-8.941 8.949-17.451 14.531-29.403 19.201-9.009 3.517-22.561 7.714-47.494 8.9-26.998 1.269-35.086 1.559-103.448 1.684-68.338.132-76.424-.125-103.431-1.294zM149.977 1.773c-27.239 1.285-45.843 5.648-62.101 12.018-16.829 6.561-31.095 15.354-45.286 29.604C28.381 57.653 19.655 71.944 13.144 88.79c-6.303 16.299-10.575 34.912-11.778 62.168C.172 178.264-.102 186.973.031 256.489c.133 69.508.439 78.234 1.741 105.547 1.302 27.231 5.649 45.828 12.019 62.093 6.569 16.83 15.353 31.088 29.611 45.288 14.25 14.201 28.55 22.918 45.404 29.438 16.282 6.295 34.902 10.583 62.15 11.778 27.305 1.203 36.022 1.468 105.521 1.335 69.532-.132 78.25-.439 105.555-1.733 27.239-1.303 45.826-5.665 62.1-12.019 16.829-6.586 31.095-15.353 45.288-29.611 14.191-14.251 22.917-28.55 29.428-45.405 6.304-16.282 10.592-34.903 11.777-62.134 1.195-27.322 1.478-36.048 1.344-105.556-.133-69.516-.447-78.225-1.741-105.523-1.294-27.255-5.657-45.844-12.019-62.118-6.577-16.829-15.352-31.079-29.602-45.287-14.25-14.192-28.55-22.935-45.404-29.429-16.29-6.305-34.903-10.601-62.15-11.779C333.747.164 325.03-.102 255.506.031c-69.507.133-78.224.431-105.529 1.742z"/></svg>
+                  </a>
+                </li>
+              );
+            }
+            if (label.includes('linkedin') || href.includes('linkedin.com')) {
+              return (
+                <li>
+                  <a href={href} aria-label="LinkedIn" class="social-link social-linkedin" target="_blank" rel="noreferrer">
+                    <svg viewBox="0 0 24 24"><path d="M6.94 8.5A1.56 1.56 0 116.93 5.4a1.56 1.56 0 01.01 3.1z" class="social-fill"></path><path d="M5.5 9.75h2.88V19H5.5V9.75z" class="social-fill"></path><path d="M10.19 9.75h2.76v1.26h.04c.38-.73 1.32-1.5 2.71-1.5 2.9 0 3.44 1.9 3.44 4.37V19h-2.88v-4.53c0-1.08-.02-2.47-1.5-2.47-1.5 0-1.73 1.17-1.73 2.39V19h-2.84V9.75z" class="social-fill"></path></svg>
+                  </a>
+                </li>
+              );
+            }
+            if (label.includes('facebook') || href.includes('facebook.com')) {
+              return (
+                <li>
+                  <a href={href} aria-label="Facebook" class="social-link" target="_blank" rel="noreferrer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                  </a>
+                </li>
+              );
+            }
+            return null;
+          })
+        ) : (
+          <>
+            <li>
+              <a href="https://www.instagram.com/steelcraft.ae" aria-label="Instagram" class="social-link" target="_blank" rel="noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M170.663 256.157c-.083-47.121 38.055-85.4 85.167-85.483 47.121-.092 85.407 38.03 85.499 85.16.091 47.129-38.047 85.4-85.176 85.492-47.112.09-85.399-38.039-85.49-85.169zm-46.108.091c.141 72.602 59.106 131.327 131.69 131.186 72.592-.141 131.35-59.09 131.209-131.692-.141-72.577-59.114-131.335-131.715-131.194-72.585.141-131.325 59.115-131.184 131.7zm237.104-137.091c.033 16.953 13.817 30.681 30.772 30.648 16.961-.033 30.689-13.811 30.664-30.764-.033-16.954-13.818-30.69-30.78-30.657-16.962.033-30.689 13.818-30.656 30.773zm-208.696 345.4c-24.958-1.087-38.511-5.234-47.543-8.709-11.961-4.629-20.496-10.178-29.479-19.094-8.966-8.95-14.532-17.46-19.202-29.397-3.508-9.032-7.73-22.569-8.9-47.527-1.269-26.982-1.559-35.077-1.683-103.432-.133-68.339.116-76.434 1.294-103.441 1.069-24.942 5.242-38.512 8.709-47.536 4.628-11.977 10.161-20.496 19.094-29.479 8.949-8.982 17.459-14.532 29.403-19.202 9.025-3.525 22.561-7.714 47.511-8.9 26.998-1.277 35.085-1.551 103.423-1.684 68.353-.132 76.448.108 103.456 1.295 24.94 1.086 38.51 5.217 47.527 8.709 11.968 4.628 20.503 10.144 29.478 19.094 8.974 8.95 14.54 17.443 19.21 29.412 3.524 9 7.714 22.553 8.892 47.494 1.285 26.999 1.576 35.095 1.7 103.433.132 68.355-.117 76.451-1.302 103.441-1.087 24.958-5.226 38.52-8.709 47.561-4.629 11.952-10.161 20.487-19.103 29.471-8.941 8.949-17.451 14.531-29.403 19.201-9.009 3.517-22.561 7.714-47.494 8.9-26.998 1.269-35.086 1.559-103.448 1.684-68.338.132-76.424-.125-103.431-1.294zM149.977 1.773c-27.239 1.285-45.843 5.648-62.101 12.018-16.829 6.561-31.095 15.354-45.286 29.604C28.381 57.653 19.655 71.944 13.144 88.79c-6.303 16.299-10.575 34.912-11.778 62.168C.172 178.264-.102 186.973.031 256.489c.133 69.508.439 78.234 1.741 105.547 1.302 27.231 5.649 45.828 12.019 62.093 6.569 16.83 15.353 31.088 29.611 45.288 14.25 14.201 28.55 22.918 45.404 29.438 16.282 6.295 34.902 10.583 62.15 11.778 27.305 1.203 36.022 1.468 105.521 1.335 69.532-.132 78.25-.439 105.555-1.733 27.239-1.303 45.826-5.665 62.1-12.019 16.829-6.586 31.095-15.353 45.288-29.611 14.191-14.251 22.917-28.55 29.428-45.405 6.304-16.282 10.592-34.903 11.777-62.134 1.195-27.322 1.478-36.048 1.344-105.556-.133-69.516-.447-78.225-1.741-105.523-1.294-27.255-5.657-45.844-12.019-62.118-6.577-16.829-15.352-31.079-29.602-45.287-14.25-14.192-28.55-22.935-45.404-29.429-16.29-6.305-34.903-10.601-62.15-11.779C333.747.164 325.03-.102 255.506.031c-69.507.133-78.224.431-105.529 1.742z"/></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com/company/steelcraft-uae/" aria-label="LinkedIn" class="social-link social-linkedin" target="_blank" rel="noreferrer">
+                <svg viewBox="0 0 24 24"><path d="M6.94 8.5A1.56 1.56 0 116.93 5.4a1.56 1.56 0 01.01 3.1z" class="social-fill"></path><path d="M5.5 9.75h2.88V19H5.5V9.75z" class="social-fill"></path><path d="M10.19 9.75h2.76v1.26h.04c.38-.73 1.32-1.5 2.71-1.5 2.9 0 3.44 1.9 3.44 4.37V19h-2.88v-4.53c0-1.08-.02-2.47-1.5-2.47-1.5 0-1.73 1.17-1.73 2.39V19h-2.84V9.75z" class="social-fill"></path></svg>
+              </a>
+            </li>
+          </>
+        )}
+      </ul>
+
+      <!-- Hamburger Menu Toggle (Mobile Only) -->
+      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-label="Toggle menu">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div class="mobile-menu-overlay">
+    <nav class="nav-mobile" aria-label="Mobile navigation">
+      <ul class="mobile-nav-list">
+        {
+          navItems.map((item) => (
+            <li class={item.subItems ? 'mobile-has-dropdown' : ''}>
+              {item.subItems ? (
+                <div>
+                  <button class="mobile-dropdown-toggle" type="button">
+                    {item.label}
+                    <svg class="mobile-dropdown-arrow" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <ul class="mobile-dropdown-menu">
+                    {item.subItems.map(subItem => (
+                      <li><a href={subItem.href}>{subItem.label}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <a href={item.href} class={`mobile-nav-link ${isActive(item.href) ? 'is-active' : ''}`.trim()}>
+                  {item.label}
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+      
+      <!-- Mobile Social List -->
+      <ul class="mobile-social-list">
+        <li>
+          <a href="https://www.instagram.com/steelcraft.ae" aria-label="Instagram" class="social-link" target="_blank" rel="noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M170.663 256.157c-.083-47.121 38.055-85.4 85.167-85.483 47.121-.092 85.407 38.03 85.499 85.16.091 47.129-38.047 85.4-85.176 85.492-47.112.09-85.399-38.039-85.49-85.169zm-46.108.091c.141 72.602 59.106 131.327 131.69 131.186 72.592-.141 131.35-59.09 131.209-131.692-.141-72.577-59.114-131.335-131.715-131.194-72.585.141-131.325 59.115-131.184 131.7zm237.104-137.091c.033 16.953 13.817 30.681 30.772 30.648 16.961-.033 30.689-13.811 30.664-30.764-.033-16.954-13.818-30.69-30.78-30.657-16.962.033-30.689 13.818-30.656 30.773zm-208.696 345.4c-24.958-1.087-38.511-5.234-47.543-8.709-11.961-4.629-20.496-10.178-29.479-19.094-8.966-8.95-14.532-17.46-19.202-29.397-3.508-9.032-7.73-22.569-8.9-47.527-1.269-26.982-1.559-35.077-1.683-103.432-.133-68.339.116-76.434 1.294-103.441 1.069-24.942 5.242-38.512 8.709-47.536 4.628-11.977 10.161-20.496 19.094-29.479 8.949-8.982 17.459-14.532 29.403-19.202 9.025-3.525 22.561-7.714 47.511-8.9 26.998-1.277 35.085-1.551 103.423-1.684 68.353-.132 76.448.108 103.456 1.295 24.94 1.086 38.51 5.217 47.527 8.709 11.968 4.628 20.503 10.144 29.478 19.094 8.974 8.95 14.54 17.443 19.21 29.412 3.524 9 7.714 22.553 8.892 47.494 1.285 26.999 1.576 35.095 1.7 103.433.132 68.355-.117 76.451-1.302 103.441-1.087 24.958-5.226 38.52-8.709 47.561-4.629 11.952-10.161 20.487-19.103 29.471-8.941 8.949-17.451 14.531-29.403 19.201-9.009 3.517-22.561 7.714-47.494 8.9-26.998 1.269-35.086 1.559-103.448 1.684-68.338.132-76.424-.125-103.431-1.294zM149.977 1.773c-27.239 1.285-45.843 5.648-62.101 12.018-16.829 6.561-31.095 15.354-45.286 29.604C28.381 57.653 19.655 71.944 13.144 88.79c-6.303 16.299-10.575 34.912-11.778 62.168C.172 178.264-.102 186.973.031 256.489c.133 69.508.439 78.234 1.741 105.547 1.302 27.231 5.649 45.828 12.019 62.093 6.569 16.83 15.353 31.088 29.611 45.288 14.25 14.201 28.55 22.918 45.404 29.438 16.282 6.295 34.902 10.583 62.15 11.778 27.305 1.203 36.022 1.468 105.521 1.335 69.532-.132 78.25-.439 105.555-1.733 27.239-1.303 45.826-5.665 62.1-12.019 16.829-6.586 31.095-15.353 45.288-29.611 14.191-14.251 22.917-28.55 29.428-45.405 6.304-16.282 10.592-34.903 11.777-62.134 1.195-27.322 1.478-36.048 1.344-105.556-.133-69.516-.447-78.225-1.741-105.523-1.294-27.255-5.657-45.844-12.019-62.118-6.577-16.829-15.352-31.079-29.602-45.287-14.25-14.192-28.55-22.935-45.404-29.429-16.29-6.305-34.903-10.601-62.15-11.779C333.747.164 325.03-.102 255.506.031c-69.507.133-78.224.431-105.529 1.742z"/></svg>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/company/steelcraft-uae/" aria-label="LinkedIn" class="social-link social-linkedin" target="_blank" rel="noreferrer">
+            <svg viewBox="0 0 24 24"><path d="M6.94 8.5A1.56 1.56 0 116.93 5.4a1.56 1.56 0 01.01 3.1z" class="social-fill"></path><path d="M5.5 9.75h2.88V19H5.5V9.75z" class="social-fill"></path><path d="M10.19 9.75h2.76v1.26h.04c.38-.73 1.32-1.5 2.71-1.5 2.9 0 3.44 1.9 3.44 4.37V19h-2.88v-4.53c0-1.08-.02-2.47-1.5-2.47-1.5 0-1.73 1.17-1.73 2.39V19h-2.84V9.75z" class="social-fill"></path></svg>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  function setupHeader() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+
+    const toggleBtn = header.querySelector('.mobile-menu-toggle');
+    const mobileOverlay = header.querySelector('.mobile-menu-overlay');
+
+    // 1. Mobile Menu Toggle
+    function toggleMobileMenu(force?: boolean) {
+      const isOpen = force !== undefined ? force : !mobileOverlay?.classList.contains('is-open');
+      mobileOverlay?.classList.toggle('is-open', isOpen);
+      toggleBtn?.classList.toggle('is-active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
+    toggleBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMobileMenu();
+    });
+
+    // Close mobile menu when clicking outside of it
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target instanceof Element && mobileOverlay?.classList.contains('is-open')) {
+        if (!target.closest('.mobile-menu-overlay') && !target.closest('.mobile-menu-toggle')) {
+          toggleMobileMenu(false);
+        }
+      }
+    });
+
+    // Close mobile menu when clicking links
+    header.querySelectorAll('.mobile-menu-overlay a').forEach(link => {
+      link.addEventListener('click', () => toggleMobileMenu(false));
+    });
+
+    // 2. Mobile Submenu Toggle (Accordion style)
+    header.querySelectorAll('.mobile-dropdown-toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const parent = btn.closest('.mobile-has-dropdown');
+        if (parent) {
+          parent.classList.toggle('is-open');
+        }
+      });
+    });
+
+    // 3. Desktop Submenu Toggle (for Touch/Click Support)
+    const dropdownToggles = header.querySelectorAll('.nav-desktop .dropdown-toggle');
+    dropdownToggles.forEach(toggle => {
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const parent = toggle.parentElement;
+        if (parent) {
+          const wasOpen = parent.classList.contains('is-open');
+          // Close other dropdowns
+          header.querySelectorAll('.nav-desktop .has-dropdown').forEach(item => {
+            item.classList.remove('is-open');
+          });
+          // Toggle current
+          if (!wasOpen) {
+            parent.classList.add('is-open');
+          }
+        }
+      });
+    });
+
+    // Close desktop dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target instanceof Element && !target.closest('.has-dropdown')) {
+        header.querySelectorAll('.nav-desktop .has-dropdown').forEach(item => {
+          item.classList.remove('is-open');
+        });
+      }
+    });
+  }
+
+  setupHeader();
+  document.addEventListener('astro:after-swap', setupHeader);
+</script>

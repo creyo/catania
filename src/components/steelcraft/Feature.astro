@@ -1,0 +1,180 @@
+---
+import '../../styles/steelcraft/home-threecolumn.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface ColumnItem {
+  title: string;
+  description?: string;
+  image?: string;
+  imageALT?: string;
+  heading?: string;
+  subHeading?: string;
+  subTitle?: string;
+  button1Text?: string;
+  button1Link?: string;
+  button2Text?: string;
+  button2Link?: string;
+}
+
+interface Props {
+  items: ColumnItem[];
+}
+
+const { items = [] } = Astro.props;
+
+const isImageFile = (str?: string) => str && /\.(webp|jpg|jpeg|png|svg|avif|gif)$/i.test(str.trim());
+
+const heading = items.find((item) => item.heading && item.heading.trim() !== '')?.heading;
+const subHeading = items.find((item) => item.subHeading && item.subHeading.trim() !== '')?.subHeading;
+
+// Process the items to resolve their image sources and button information
+const resolvedItems = items.map(item => {
+  let imageFile = '';
+  if (isImageFile(item.image)) {
+    imageFile = item.image!;
+  } else if (isImageFile(item.button1Text)) {
+    imageFile = item.button1Text!;
+  }
+
+  let titleVal = item.title;
+  if (!titleVal && item.image && !isImageFile(item.image)) {
+    titleVal = item.image;
+  }
+
+  let descVal = item.description;
+  if (!descVal && item.imageALT) {
+    descVal = item.imageALT;
+  }
+
+  let altVal = item.imageALT && item.imageALT !== descVal ? item.imageALT : (titleVal || '');
+
+  const b1Text = item.button1Text && !isImageFile(item.button1Text) ? item.button1Text : '';
+  const b1Link = item.button1Link || '';
+
+  const b2Text = item.button2Text && !isImageFile(item.button2Text) ? item.button2Text : '';
+  const b2Link = item.button2Link || '';
+
+  return {
+    title: titleVal || '',
+    subTitle: item.subTitle || '',
+    description: descVal || '',
+    imageALT: altVal,
+    imageSrc: imageFile ? resolveImage(imageFile) : null,
+    button1Text: b1Text,
+    button1Link: b1Link,
+    button2Text: b2Text,
+    button2Link: b2Link,
+  };
+});
+
+const defaultLink1 = resolvedItems.find((item) => item.button1Link && item.button1Link.trim() !== '')?.button1Link || '#';
+const defaultLink2 = resolvedItems.find((item) => item.button2Link && item.button2Link.trim() !== '')?.button2Link || '#';
+
+// Count how many items have button text defined
+const itemsWithButtons = resolvedItems.filter(
+  (item) => item.button1Text || item.button2Text
+);
+
+// If multiple items (> 1) have button text defined, show per-card buttons.
+// If only 1 item in total has a button, show it centered at the bottom of the section.
+const hasPerItemButtons = itemsWithButtons.length > 1;
+
+const singleButton1Item = !hasPerItemButtons ? resolvedItems.find((item) => item.button1Text) : null;
+const singleButton2Item = !hasPerItemButtons ? resolvedItems.find((item) => item.button2Text) : null;
+
+const singleButton1Text = singleButton1Item?.button1Text;
+const singleButton1Link = singleButton1Item?.button1Link || defaultLink1;
+
+const singleButton2Text = singleButton2Item?.button2Text;
+const singleButton2Link = singleButton2Item?.button2Link || defaultLink2;
+---
+
+{resolvedItems.length > 0 && (
+  <section class="threecolumn">
+    <div class="threecolumn-container reveal-on-scroll">
+      {(heading || subHeading) && (
+        <div class="threecolumn-header">
+          {heading && (
+            <h2 class="threecolumn-heading">{heading}</h2>
+          )}
+          {subHeading && (
+            <p class="threecolumn-subheading">{subHeading}</p>
+          )}
+        </div>
+      )}
+
+      <div class="threecolumn-grid">
+        {resolvedItems.map((item) => {
+          const hasCardButton = hasPerItemButtons && (item.button1Text || item.button2Text);
+          const link1 = item.button1Link || defaultLink1;
+          const link2 = item.button2Link || defaultLink2;
+
+          return (
+            <div class="threecolumn-card">
+              {item.imageSrc && (
+                <div class="threecolumn-image-wrapper">
+                  <Image 
+                    class="threecolumn-image" 
+                    src={item.imageSrc} 
+                    alt={item.imageALT || item.title || ''} 
+                    widths={[400, 800, 1200]}
+                    sizes="(max-width: 768px) 100vw, 450px"
+                    quality="high"
+                    format="webp"
+                    loading="lazy" 
+                    decoding="async" 
+                  />
+                  <div class="threecolumn-image-overlay"></div>
+                </div>
+              )}
+              <div class="threecolumn-card-body">
+                {item.subTitle && (
+                  <span class="threecolumn-card-badge">{item.subTitle}</span>
+                )}
+                {item.title && <h3 class="threecolumn-title">{item.title}</h3>}
+                {item.description && (
+                  <p class="threecolumn-description">{item.description}</p>
+                )}
+                {hasCardButton && (
+                  <div class="threecolumn-card-actions">
+                    {item.button1Text && (
+                      <a class="threecolumn-button card-button" href={link1}>
+                        {item.button1Text}
+                        <span class="btn-arrow">→</span>
+                      </a>
+                    )}
+                    {item.button2Text && (
+                      <a class="threecolumn-button secondary card-button" href={link2}>
+                        {item.button2Text}
+                        <span class="btn-arrow">→</span>
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {!hasPerItemButtons && (singleButton1Text || singleButton2Text) ? (
+        <div class="threecolumn-actions">
+          {singleButton1Text && (
+            <a class="threecolumn-button" href={singleButton1Link}>
+              {singleButton1Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+          {singleButton2Text && (
+            <a class="threecolumn-button secondary" href={singleButton2Link}>
+              {singleButton2Text}
+              <span class="btn-arrow">→</span>
+            </a>
+          )}
+        </div>
+      ) : null}
+    </div>
+  </section>
+)}
+

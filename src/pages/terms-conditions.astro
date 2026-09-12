@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Body from '../components/catania/Body.astro';
+import { frontmatter } from '../content/terms-conditions.mdx';
+
+const bodyItem = frontmatter.data.find((c) => c.section === 'Body' && (c.publish || 'Y').toUpperCase() === 'Y');
+
+
+---
+<Layout
+  title={frontmatter.metaTitle || "Terms & Conditions"}
+  description={frontmatter.metaDescription || "Default description"}
+>
+{bodyItem && <Body {...bodyItem} folderPath="terms-conditions" />}
+
+</Layout>

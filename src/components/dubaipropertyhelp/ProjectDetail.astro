@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/catania/project-detail.css';
+
+const { item, Content } = Astro.props;
+const project = item || {};
+const slugFolder = Astro.props.slugFolder || 'projects';
+
+const imageSrc = resolveImage(project.feature1Image || project.image || project.imageFeatured);
+const title = project.projectName || project.title || project.name || "Project Detail";
+const location = project.location || "";
+const category = project.category || "Commercial Kitchen Project";
+---
+
+<section class="project-detail-section">
+  <div class="project-detail-container">
+    <a href={`/${slugFolder}`} class="project-detail-back-link">
+      ← Back to {slugFolder.charAt(0).toUpperCase() + slugFolder.slice(1)}
+    </a>
+
+    <div class="project-detail-grid">
+      {/* Project Image Column */}
+      <div class="project-detail-gallery">
+        {imageSrc && (
+          <div class="project-detail-image-wrapper">
+            <Image
+              class="project-detail-image"
+              src={imageSrc}
+              alt={project.featuredALT || project.imageALT || title}
+              widths={[400, 800, 1200]}
+              sizes="(max-width: 768px) 100vw, 600px"
+              quality="high"
+              format="webp"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Project Content Column */}
+      <div class="project-detail-content">
+        {category && <span class="project-detail-badge">{category}</span>}
+        <h1 class="project-detail-title">{title}</h1>
+        <hr class="project-detail-divider" />
+
+        {location && (
+          <div class="project-detail-meta">
+            <div class="project-detail-meta-item">
+              <span class="project-detail-meta-label">Location</span>
+              <span class="project-detail-meta-value">{location}</span>
+            </div>
+          </div>
+        )}
+
+        {project.description && (
+          <p class="project-detail-text">
+            {project.description}
+          </p>
+        )}
+
+        <div class="project-detail-text">
+          {Content && <Content />}
+        </div>
+
+        <div class="project-detail-actions">
+          <a class="project-detail-button" href="/getintouch">
+            Inquire About Similar Project
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

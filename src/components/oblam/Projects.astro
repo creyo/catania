@@ -1,0 +1,140 @@
+---
+import '../../styles/catania/projects.css';
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+
+interface Props {
+  heading?: string;
+  subTitle?: string;
+  description?: string;
+  button1Text?: string;
+  button1Link?: string;
+  items?: any[];
+  folderPath?: string;
+}
+
+const {
+  heading = "Our Projects",
+  subTitle,
+  description,
+  button1Text,
+  button1Link,
+  items,
+  folderPath = "projects"
+} = Astro.props;
+
+let projects = items || [];
+if (!projects || projects.length === 0) {
+  const projectFiles = import.meta.glob('../../content/projects/*.mdx', { eager: true });
+  projects = Object.values(projectFiles)
+    .map(p => (p as any).frontmatter)
+    .filter(p => p && (p.publish === 'Y' || p.publish === 'y' || !p.publish))
+    .sort((a, b) => Number(a.order || 999) - Number(b.order || 999));
+}
+---
+
+{projects.length > 0 && (
+  <section class="projects-section">
+    <div class="projects-container">
+      {(heading || subTitle || description) && (
+        <div class="projects-header">
+          {heading && <h2 class="projects-heading">{heading}</h2>}
+          {description && <p class="projects-subheading">{description}</p>}
+        </div>
+      )}
+
+      <div class="projects-grid">
+        {projects.map((item, index) => {
+          const imageSrc = resolveImage(item.feature1Image || item.image || item.imageFeatured);
+          const name = item.projectName || item.title || item.name || "Project";
+          const location = item.location || item.category || "";
+          const targetFolder = item.folder || folderPath || 'projects';
+          const projectUrl = `/${targetFolder}/${item.slug}`;
+
+          return (
+            <div class="project-card">
+              <a href={projectUrl} class="card-image">
+                {imageSrc && (
+                  <Image
+                    class="project-card-img"
+                    src={imageSrc}
+                    alt={item.featuredALT || item.imageAltText || item.imageALT || name}
+                    widths={[300, 600, 900]}
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 25vw"
+                    quality="mid"
+                    format="webp"
+                    loading={index < 4 ? "eager" : "lazy"}
+                    fetchpriority={index === 0 ? "high" : undefined}
+                    decoding="async"
+                  />
+                )}
+              </a>
+              <div class="card-content">
+                <h2 class="project-title">{name}</h2>
+                <div class="card-meta" role="button" aria-expanded="false" tabindex="0">
+                  <span class="project-location">{location}</span>
+                  <div class="description-toggle-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="description-wrapper">
+                  <div class="description-content">
+                    {item.description && <p>{item.description}</p>}
+                    <a href={projectUrl} class="card-link-text">Explore Project</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {(button1Text || button1Link) && (
+        <div class="projects-cta-wrap">
+          <a href={button1Link || "/getintouch"} class="projects-cta-btn">
+            {button1Text || "Start your project"}
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<script>
+  function setupProjectToggles() {
+    const cards = document.querySelectorAll('.project-card');
+    cards.forEach(card => {
+      const meta = card.querySelector('.card-meta');
+      if (meta) {
+        const handleToggle = (e: Event) => {
+          e.preventDefault();
+          const isOpen = card.classList.contains('is-open');
+          if (!isOpen) {
+            card.classList.add('is-open');
+            meta.setAttribute('aria-expanded', 'true');
+          } else {
+            card.classList.remove('is-open');
+            meta.setAttribute('aria-expanded', 'false');
+          }
+        };
+
+        meta.removeEventListener('click', (meta as any)._toggleHandler);
+        (meta as any)._toggleHandler = handleToggle;
+        meta.addEventListener('click', handleToggle);
+
+        meta.addEventListener('keydown', (e: Event) => {
+          const keyEv = e as KeyboardEvent;
+          if (keyEv.key === 'Enter' || keyEv.key === ' ') {
+            keyEv.preventDefault();
+            handleToggle(e);
+          }
+        });
+      }
+    });
+  }
+
+  setupProjectToggles();
+  document.addEventListener('astro:after-swap', setupProjectToggles);
+</script>

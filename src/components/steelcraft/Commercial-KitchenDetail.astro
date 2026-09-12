@@ -1,0 +1,175 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../../utils/imageResolver';
+import '../../styles/steelcraft/commercial-kitchens-detail.css';
+
+const { item, Content } = Astro.props;
+const data = item || {};
+const slugFolder = Astro.props.slugFolder || data.folder;
+
+const imageSrc = resolveImage(data.image || data.imageFeatured);
+const title = data.title || data.name || "";
+const subtitleText = data.subTitle || data.category || "";
+const finalButton1Link = data.button1Text && !data.button1Link ? '/contactus' : data.button1Link;
+const finalButton2Link = data.button2Text && !data.button2Link ? '/contactus' : data.button2Link;
+
+const features = [];
+for (let i = 1; i <= 8; i++) {
+  const img = data[`feature${i}Image`];
+  const t = data[`feature${i}Title`];
+  const d = data[`feature${i}Description`];
+  if (img || t || d) {
+    features.push({
+      image: img,
+      alt: data[`feature${i}ALT`],
+      title: t,
+      description: d,
+      imageSrc: img ? resolveImage(img) : null
+    });
+  }
+}
+
+const ctas = [];
+for (let i = 1; i <= 3; i++) {
+  const t = data[`cTA${i}Title`];
+  const d = data[`cTA${i}Description`];
+  if (t || d) {
+    ctas.push({
+      title: t,
+      description: d
+    });
+  }
+}
+
+function renderMarkdownLinks(text: string): string {
+  if (!text) return '';
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function renderMarkdown(text: string): string {
+  if (!text) return '';
+  let html = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  const lines = html.split('\n');
+  const result: string[] = [];
+  let inList = false;
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    if (trimmed.startsWith('- ')) {
+      if (!inList) { result.push('<ul class="section-list">'); inList = true; }
+      result.push(`<li>${trimmed.slice(2).trim()}</li>`);
+    } else {
+      if (inList) { result.push('</ul>'); inList = false; }
+      result.push(line);
+    }
+  }
+  if (inList) result.push('</ul>');
+  return result.join('\n');
+}
+---
+
+<div class="kitchen-page">
+  <section class="kitchen-hero">
+    {slugFolder && (
+      <div class="back-wrap container">
+        <a href={`/${slugFolder}`} class="back-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to {slugFolder.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+        </a>
+      </div>
+    )}
+    <div class="kitchen-hero__inner">
+      <h1 set:html={data.heroTitle || title} />
+      {(data.heroSubtitle || subtitleText) && <p class="kitchen-hero__subtitle" set:html={data.heroSubtitle || subtitleText} />}
+      {data.description && <p class="kitchen-hero__main-description" set:html={data.description} />}
+    </div>
+  </section>
+
+  {features.length > 0 && (
+    <section class="kitchen-features">
+      {features.map((feat, index) => (
+        <div class="feature-row">
+          <div class="feature-image-col">
+            {feat.imageSrc && (
+              <div class="feature-image-wrapper">
+                <Image
+                  class="feature-image"
+                  src={feat.imageSrc}
+                  alt={feat.alt || feat.title || title || ''}
+                  widths={[300, 600, 900]}
+                  sizes="(max-width: 768px) 100vw, 500px"
+                  quality="high"
+                  format="avif"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              </div>
+            )}
+          </div>
+          <div class="feature-content-col">
+            {feat.title && <h2 set:html={feat.title} />}
+            {feat.description && (
+              <div class="section-desc" set:html={renderMarkdown(feat.description)} />
+            )}
+          </div>
+        </div>
+      ))}
+    </section>
+  )}
+
+  {(data.ourProcessSubtitle || data.ourProcessTitle || data.ourProcessDescription) && (
+    <section class="kitchen-process">
+      <div class="kitchen-process__container">
+        {data.ourProcessSubtitle && <span class="process-subtitle" set:html={data.ourProcessSubtitle} />}
+        {data.ourProcessTitle && <h2 set:html={data.ourProcessTitle} />}
+        {data.ourProcessDescription && <p class="process-description" set:html={data.ourProcessDescription} />}
+      </div>
+    </section>
+  )}
+
+  {ctas.length > 0 && (
+    <section class="kitchen-ctas">
+      <div class="kitchen-ctas__grid">
+        {ctas.map((cta) => (
+          <div class="cta-item">
+            <div class="cta-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="cta-text">
+              {cta.title && <h3 set:html={cta.title} />}
+              {cta.description && <p set:html={cta.description} />}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {Content && (
+    <section class="mdx-body">
+      <div class="mdx-body__inner">
+        <Content />
+      </div>
+    </section>
+  )}
+
+  {(data.button1Text && finalButton1Link) || (data.button2Text && finalButton2Link) ? (
+    <section class="kitchen-actions" style="display: flex; justify-content: center; gap: 16px; padding: 40px 24px;">
+      {data.button1Text && finalButton1Link && (
+        <a class="back-link" style="padding: 12px 24px; background: var(--color-primary); color: #fff !important; border-radius: 6px;" href={finalButton1Link}>
+          {data.button1Text} &rarr;
+        </a>
+      )}
+      {data.button2Text && finalButton2Link && (
+        <a class="back-link" style="padding: 12px 24px; background: var(--color-bg-card); color: var(--color-text-inverse) !important; border-radius: 6px;" href={finalButton2Link}>
+          {data.button2Text} &rarr;
+        </a>
+      )}
+    </section>
+  ) : null}
+
+  {data.footNote && (
+    <section class="kitchen-footer-note">
+      <div class="footer-note-content" set:html={renderMarkdownLinks(data.footNote)} />
+    </section>
+  )}
+</div>
