@@ -3,7 +3,7 @@ import '../styles/global.css';
 import { frontmatter as settingsFrontmatter } from '../content/settings.mdx';
 
 const activeTheme = (settingsFrontmatter.theme || 'catania').toLowerCase();
-const faviconPath = `/${activeTheme}/favicon.ico`;
+const faviconPath = `/${activeTheme}/favicon.png`;
 const colorTheme = (settingsFrontmatter.color || 'blue').toLowerCase();
 
 // Automatically bundle ALL theme Headers & Footers at build time
