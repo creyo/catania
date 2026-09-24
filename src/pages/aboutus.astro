@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Top from '../components/catania/Top.astro';
 import AboutUsHero from '../components/catania/AboutUsHero.astro';
 import Mission from '../components/catania/Mission.astro';
+import Testimonial from '../components/catania/Testimonial.astro';
 import LastBlock from '../components/catania/LastBlock.astro';
 import { frontmatter } from '../content/aboutus.mdx';
 
@@ -11,6 +12,8 @@ const topItem = frontmatter.data.find((c) => c.section === 'Top' && (c.publish |
 const heroItem = frontmatter.data.find((c) => c.section === 'Hero' && (c.publish || 'Y').toUpperCase() === 'Y');
 
 const missionItems = frontmatter.data.filter((c) => c.section === 'Mission' && (c.publish || 'Y').toUpperCase() === 'Y').sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+const testimonialItems = frontmatter.data.filter((c) => c.section === 'Testimonial' && (c.publish || 'Y').toUpperCase() === 'Y').sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
 
 const lastblockItem = frontmatter.data.find((c) => c.section === 'LastBlock' && (c.publish || 'Y').toUpperCase() === 'Y');
 
@@ -23,6 +26,7 @@ const lastblockItem = frontmatter.data.find((c) => c.section === 'LastBlock' && 
 {topItem && <Top {...topItem} folderPath="aboutus" />}
 {heroItem && <AboutUsHero {...heroItem} folderPath="aboutus" />}
 {missionItems.length > 0 && <Mission items={missionItems} folderPath="aboutus" />}
+{testimonialItems.length > 0 && <Testimonial items={testimonialItems} folderPath="aboutus" />}
 {lastblockItem && <LastBlock {...lastblockItem} folderPath="aboutus" />}
 
 </Layout>
