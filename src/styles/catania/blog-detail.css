@@ -36,8 +36,8 @@
 
 .blog-detail-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 64px;
+  grid-template-columns: 1fr;
+  gap: 40px;
   align-items: start;
 }
 
@@ -106,7 +106,6 @@
   line-height: 1.75;
   color: var(--color-text-secondary);
   margin: 0;
-  white-space: pre-line;
 }
 
 .blog-detail-actions {
@@ -173,4 +172,125 @@
     width: 100%;
     justify-content: center;
   }
+}
+.blog-detail-text table {
+  margin-top: 0;
+  margin-bottom: 32px; /* Adjust this number to your preferred spacing */
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Optional: Add a little spacing between the table text and the next paragraph */
+.blog-detail-text p {
+  margin-bottom: 24px;
+}
+/* --- Table Formatting --- */
+.blog-detail-text table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 32px 0; /* Spacing before and after the table */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  overflow: hidden; /* This makes the rounded corners work on tables */
+  background-color: #ffffff;
+}
+
+.blog-detail-text th {
+  background-color: #4338CA; /* Deep Indigo background for headers */
+  color: #ffffff;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.blog-detail-text td {
+  padding: 16px;
+  border-bottom: 1px solid #E2E8F0;
+  color: var(--color-text-secondary); /* Gray text for data */
+  font-size: 15px;
+}
+
+/* Alternating row colors for readability */
+.blog-detail-text tr:nth-child(even) td {
+  background-color: #F8FAFC;
+}
+
+/* Remove bottom border on the very last row */
+.blog-detail-text tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- Unordered Lists (Bullet Points) --- */
+.blog-detail-text ul {
+  margin: 24px 0;
+  padding-left: 24px;
+  list-style: none; /* Removes default browser bullets */
+}
+
+.blog-detail-text ul li {
+  position: relative;
+  margin-bottom: 12px;
+  padding-left: 20px;
+  color: #334155; /* Dark slate text */
+  line-height: 1.75;
+}
+
+/* Custom Indigo bullet dot */
+.blog-detail-text ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+}
+
+/* --- Ordered Lists (Numbered Points) --- */
+.blog-detail-text ol {
+  margin: 24px 0;
+  padding-left: 24px;
+  list-style: none; /* Removes default browser numbers */
+  counter-reset: step-counter;
+}
+
+.blog-detail-text ol li {
+  position: relative;
+  margin-bottom: 16px;
+  padding-left: 40px;
+  color: #334155;
+  line-height: 1.75;
+}
+
+/* Custom Indigo circle numbers */
+.blog-detail-text ol li::before {
+  content: counter(step-counter);
+  counter-increment: step-counter;
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 26px;
+  height: 26px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* --- Paragraph spacing (to keep text tidy) --- */
+.blog-detail-text p {
+  margin: 0 0 24px 0;
+}
+
+.blog-detail-text h2, 
+.blog-detail-text h3 {
+  margin-top: 48px;
+  margin-bottom: 16px;
+  color: var(--color-primary-dark);
 }
